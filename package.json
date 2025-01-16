@@ -1,18 +1,20 @@
+
 {
   "name": "attendance-system",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "BatchGet + BasicAuth + WebSocket + Filter C/F/H + Subtable for Heroku",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "engines": {
+    "node": "14.x"
+  },
   "dependencies": {
+    "express": "^4.17.3",
+    "body-parser": "^1.20.2",
     "cors": "^2.8.5",
-    "express": "^4.21.1",
-    "googleapis": "^144.0.0",
-    "ws": "^8.18.0"
+    "ws": "^8.13.0",
+    "googleapis": "^118.0.0"
   }
 }
