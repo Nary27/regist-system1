@@ -9,10 +9,10 @@ const http = require("http");
 const WebSocket = require("ws");
 const { google } = require("googleapis");
 
-// ========== Herokuの場合、単一ポートが process.env.PORT で割り当てられる ==========
+// ====== Herokuで単一ポート ======
 const PORT = process.env.PORT || 3000;
 
-// Basic認証 (ID=abc, PW=ABC)
+// Basic認証 ID/PW
 const BASIC_USER = "abc";
 const BASIC_PASS = "ABC";
 
@@ -20,16 +20,15 @@ const BASIC_PASS = "ABC";
 const SPREADSHEET_ID = "1pMus9SiW5B26B9rc6lzdG3rc0IkA4lEMkUAwWVqWm4I";
 const API_KEY = 'AIzaSyCJMJHHiar0P2e6jdWm0HJdGldAaE3b05I'; // 実際のキーに
 
-// 除外シート
+// 除外するシート
 const EXCLUDED_SHEETS = [
   "データまとめ",
   "営業所分類",
-  "来場数内訳", // タブには表示しないがサブテーブルで使用
+  "来場数内訳", // タブには表示しないがサブテーブル表示で使う
   "リーダー",
   "履歴"
 ];
 
-// Expressアプリ
 const app = express();
 
 // Basic認証ミドルウェア
@@ -53,10 +52,10 @@ app.use((req, res, next) => {
 app.use(cors());
 app.use(bodyParser.json());
 
-// 静的ファイル (publicフォルダの index.html 等)
+// 静的ファイル (public)
 app.use(express.static(path.join(__dirname, "public")));
 
-// Google Sheets 関数群
+// ====== Google Sheets 関数 ======
 async function getSpreadsheetInfo() {
   const sheets = google.sheets({ version: "v4" });
   try {
@@ -94,35 +93,36 @@ async function getMultipleSheetsData(sheetNames) {
       const sheetName = rawSheetName.replace(/^'/, "").replace(/'$/, "");
       const rawData = vr.values || [];
 
-      let parsed = rawData.slice(1).filter(row => {
-        if (!row) return false;
-        const isAllEmpty = row.every(cell => !cell || !cell.trim?.());
-        return !isAllEmpty;
-      })
-      .map(row => {
-        // row[] mapping: B=0, C=1, D=2, E=3, F=4, G=5, H=6, I=7 ...
-        const colC = row[1] || ""; // C列
-        const colF = row[4] || ""; // F列
-        const colH = row[6] || ""; // H列
-        return {
-          no: row[0] || "",
-          arrival: row[2]?.toUpperCase() === "TRUE" ? "true" : "false",
-          departure: row[3]?.toUpperCase() === "TRUE" ? "true" : "false",
-          drName: row[4] || "",
-          gBlank: row[5] || "",
-          furigana: row[6] || "",
-          facility: row[7] || "",
-          remarks: row[8] || "",
-          arrivalTime: row[10] || "",
-          departureTime: row[11] || "",
-          region: row[12] || "",
-          canceledByO: row[13]?.toUpperCase() === "TRUE",
+      let parsed = rawData.slice(1)
+        .filter(row => {
+          if (!row) return false;
+          const isAllEmpty = row.every(cell => !cell || !cell.trim?.());
+          return !isAllEmpty;
+        })
+        .map(row => {
+          // B=0, C=1, D=2, E=3, F=4, G=5, H=6, I=7, ...
+          const colC = row[1] || "";
+          const colF = row[4] || "";
+          const colH = row[6] || "";
+          return {
+            no: row[0] || "",
+            arrival: row[2]?.toUpperCase() === "TRUE" ? "true" : "false",
+            departure: row[3]?.toUpperCase() === "TRUE" ? "true" : "false",
+            drName: row[4] || "",
+            gBlank: row[5] || "",
+            furigana: row[6] || "",
+            facility: row[7] || "",
+            remarks: row[8] || "",
+            arrivalTime: row[10] || "",
+            departureTime: row[11] || "",
+            region: row[12] || "",
+            canceledByO: row[13]?.toUpperCase() === "TRUE",
 
-          colC, colF, colH // for filtering
-        };
-      });
+            colC, colF, colH
+          };
+        });
 
-      // "全体"シート => C,F,H 列のいずれかが空なら表示しない
+      // 全体シート => C,F,Hいずれか空なら除外
       if (sheetName === "全体") {
         parsed = parsed.filter(r => {
           if (!r.colC.trim() || !r.colF.trim() || !r.colH.trim()) {
@@ -151,7 +151,7 @@ async function getSummaryData() {
       key: API_KEY
     });
     let tableData = resp.data.values || [];
-    // 空セルを除外
+    // 空セル除外
     tableData = tableData.map(rowArr => {
       const filtered = rowArr.filter(cell => cell && cell.trim());
       return filtered;
@@ -163,7 +163,7 @@ async function getSummaryData() {
   }
 }
 
-// ルート定義
+// ====== ルート ======
 app.get("/info", async (req, res) => {
   console.log("[GET /info]");
   const info = await getSpreadsheetInfo();
@@ -209,7 +209,7 @@ app.post("/api/sheetUpdate", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
-// 単一ポートで HTTP + WebSocket 同居
+// 単一ポートで HTTP + WebSocket
 const httpServer = http.createServer(app);
 const wss = new WebSocket.Server({ server: httpServer });
 

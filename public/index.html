@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <title>Heroku Deploy Example</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>Heroku Deploy Example (regist-check-app-d3670d68ff78)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    /* ページ全体コピー不可 */
     body {
       margin: 0; padding: 0;
       font-family: Arial, sans-serif;
@@ -23,58 +22,59 @@
     }
     .tab {
       padding: 0.8rem; margin: 0 0.2rem;
-      border: 1px solid #ccc; border-radius: 5px 5px 0 0;
-      background: #e0e0e0; white-space: nowrap;
-      user-select: none;
+      border:1px solid #ccc; border-radius:5px 5px 0 0;
+      background:#e0e0e0; white-space:nowrap;
+      user-select:none;
     }
     .tab.active {
-      background: #fff; font-weight: bold;
-      border-bottom: 1px solid #fff;
+      background:#fff; font-weight:bold;
+      border-bottom:1px solid #fff;
     }
     .tab-content {
-      display: none; padding: 1rem;
-      max-height: 70vh; overflow-y: auto;
-      user-select: none;
+      display:none; padding:1rem; max-height:70vh;
+      overflow-y:auto; user-select:none;
     }
-    .tab-content.active { display: block; }
+    .tab-content.active {
+      display:block;
+    }
 
     /* メインテーブル: min-width 1500px */
     table.main-table {
-      width: 100%;
-      min-width: 1500px;
-      border-collapse: collapse;
-      margin-top: 0.5rem;
+      width:100%;
+      min-width:1500px;
+      border-collapse:collapse;
+      margin-top:0.5rem;
     }
     /* サマリテーブル: min-width 330px */
     table.summary-table {
-      border-collapse: collapse;
-      margin-top: 0.5rem;
-      min-width: 330px;
+      border-collapse:collapse;
+      margin-top:0.5rem;
+      min-width:330px;
     }
     th, td {
-      border: 1px solid #ddd;
-      padding: 0.8rem; text-align: center;
-      user-select: none;
+      border:1px solid #ddd; padding:0.8rem; text-align:center;
+      user-select:none;
     }
+    .status-coming { background-color:red; color:#fff; }
+    .status-leaving { background-color:blue; color:#fff; }
+    .status-not-arrived { background-color:#fff; color:#000; }
+    .status-cancelled { background-color:gray; color:#fff; }
 
-    .status-coming { background-color: red; color: #fff; }
-    .status-leaving { background-color: blue; color: #fff; }
-    .status-not-arrived { background-color: #fff; color: #000; }
-    .status-cancelled { background-color: gray; color: #fff; }
-
-    @media (max-width: 600px) {
+    @media (max-width:600px) {
       table.main-table {
-        min-width: 1500px;
+        min-width:1500px;
       }
       table.summary-table {
-        min-width: 330px;
+        min-width:330px;
       }
       th, td {
-        font-size: 0.9rem; padding: 0.7rem;
+        font-size:0.9rem;
+        padding:0.7rem;
       }
-      /* No列を狭く (1番目) */
-      table.main-table td:nth-of-type(1), table.main-table th:nth-of-type(1) {
-        width: 50px;
+      /* No列を狭く (最初の列) */
+      table.main-table td:nth-of-type(1),
+      table.main-table th:nth-of-type(1) {
+        width:50px;
       }
     }
   </style>
@@ -85,51 +85,46 @@
   <div id="tab-contents"></div>
 
   <script>
-    // Basic認証をクライアント側で付与する場合
+    // Basic認証
     const BASIC_AUTH = { user: "abc", pass: "ABC" };
     function createBasicAuthHeader() {
       const token = btoa(`${BASIC_AUTH.user}:${BASIC_AUTH.pass}`);
       return `Basic ${token}`;
     }
-
-    // fetch wrapper with BasicAuth
-    async function authFetch(url, options = {}) {
+    async function authFetch(url, options={}) {
       const headers = options.headers || {};
       headers["Authorization"] = createBasicAuthHeader();
       options.headers = headers;
       return fetch(url, options);
     }
 
-    // e.g. "https://<yourapp>.herokuapp.com"
-    const API_BASE_URL = ""; // 空 => 同じドメインの場合
-    // WebSocket => wss://<yourapp>.herokuapp.com or ws://localhost:3000
-    let WS_URL = "";
-    // もしHeroku上にデプロイしたら wss://..., ローカルなら ws://localhost:3000
-    // 以下は簡易的に書き換える:
-    if (location.hostname.includes("herokuapp.com")) {
-      WS_URL = `wss://${location.hostname}`;
-    } else {
-      WS_URL = `ws://localhost:3000`;
-    }
+    // Herokuドメイン
+    // https://regist-check-app-d3670d68ff78.herokuapp.com/
+    // WebSocketは wss://regist-check-app-d3670d68ff78.herokuapp.com
+    const API_BASE_URL = "https://regist-check-app-d3670d68ff78.herokuapp.com";
+    const WS_URL = "wss://regist-check-app-d3670d68ff78.herokuapp.com";
 
-    // デバウンス用
     let debounceTimer = null;
     let lastFetchAllTime = 0;
-    const DEBOUNCE_DELAY = 2000;
-    const CACHE_COOLDOWN = 5000;
+    const DEBOUNCE_DELAY = 2000;  // 2秒
+    const CACHE_COOLDOWN = 5000;  // 5秒
 
     // WebSocket
     const ws = new WebSocket(WS_URL);
-    ws.onopen = () => console.log("[WS] connected");
-    ws.onmessage = evt => {
+    ws.onopen = () => {
+      console.log("[WebSocket] connected to", WS_URL);
+    };
+    ws.onmessage = (evt) => {
       const msg = JSON.parse(evt.data);
-      console.log("[WS message]", msg);
+      console.log("[WS onmessage]", msg);
       if (msg.type === "sheetUpdated") {
+        // もし 来場数内訳シートなら => 即座に fetchSummaryData()
         if (msg.sheetName === "来場数内訳") {
-          // サブテーブル(来場数内訳)を即更新
+          console.log("[sheetUpdated] => subtable only => fetchSummaryData now");
           fetchSummaryData();
         } else {
-          // 他シート => デバウンス
+          // それ以外 => デバウンス
+          console.log("[sheetUpdated] => debounce for main table");
           debounceFetchAllData();
         }
       }
@@ -143,6 +138,7 @@
       }, DEBOUNCE_DELAY);
     }
 
+    // main table
     async function fetchAllDataAtOnce() {
       const now = Date.now();
       if (now - lastFetchAllTime < CACHE_COOLDOWN) {
@@ -150,8 +146,8 @@
         return;
       }
       lastFetchAllTime = now;
-      console.log("[fetchAllDataAtOnce] start...");
 
+      console.log("[fetchAllDataAtOnce] start batch-data");
       const res = await authFetch(`${API_BASE_URL}/batch-data`);
       if (!res.ok) {
         console.error("[fetchAllDataAtOnce] error", res.status);
@@ -165,8 +161,9 @@
       });
     }
 
+    // sub table
     async function fetchSummaryData() {
-      console.log("[fetchSummaryData] start...");
+      console.log("[fetchSummaryData] start summary-data");
       const res = await authFetch(`${API_BASE_URL}/summary-data`);
       if (!res.ok) {
         console.error("[fetchSummaryData] error", res.status);
@@ -182,20 +179,20 @@
       tableData.forEach(rowArr => {
         html += "<tr>";
         rowArr.forEach(cell => {
-          html += `<td>${cell || ""}</td>`;
+          html += `<td>${cell||""}</td>`;
         });
         html += "</tr>";
       });
       html += "</table>";
-
       summaryDiv.innerHTML = html;
     }
 
+    // onLoad
     window.addEventListener("DOMContentLoaded", async () => {
-      // 1) /info
+      // /info
       const infoRes = await authFetch(`${API_BASE_URL}/info`);
       if (!infoRes.ok) {
-        console.error("[DOMContentLoaded] /info error", infoRes.status);
+        console.error("[DOMContentLoaded] /info error:", infoRes.status);
         return;
       }
       const info = await infoRes.json();
@@ -203,11 +200,9 @@
 
       createTabs(info.sheetNames);
 
-      // 初回読み込み
       await fetchAllDataAtOnce();
       await fetchSummaryData();
 
-      // タブ復元
       const savedIndex = localStorage.getItem("activeTabIndex");
       if (savedIndex !== null) {
         const idx = parseInt(savedIndex, 10);
@@ -236,19 +231,18 @@
         contentsContainer.appendChild(contentDiv);
       });
 
-      // メニュータブ (0番)
+      // メニュータブ(0)
       const menuDiv = document.getElementById("content-0");
       menuDiv.innerHTML = `
         ${createMenuContentHTML(sheetNames)}
         <div id="summary-table-area" style="margin-top:1rem;"></div>
       `;
 
-      // 1.. シートタブ
+      // シートタブ(1..)
       sheetNames.forEach((sName, i) => {
         const realIndex = i + 1;
         const div = document.getElementById(`content-${realIndex}`);
-
-        // 列順: No -> 状態 -> DR氏名 -> 空 -> フリガナ -> 施設名 -> 備考 -> ご来場時間 -> ご退場時間 -> 地域区分
+        // 列順: No->状態->DR氏名->空->フリガナ->施設名->備考->来場時間->退場時間->地域区分
         div.innerHTML = `
           <div class="table-wrapper">
             <table class="main-table">
@@ -257,7 +251,7 @@
                   <th>No</th>
                   <th>状態</th>
                   <th>DR氏名</th>
-                  <th>空</th>
+                  <th></th>
                   <th>フリガナ</th>
                   <th>施設名</th>
                   <th>備考</th>
@@ -309,8 +303,8 @@
       if (!tableBody) return;
 
       console.log("[updateTable]", sheetName, data);
-
       tableBody.innerHTML = "";
+
       data.forEach(row => {
         const {
           no, arrival, departure, drName, gBlank,
