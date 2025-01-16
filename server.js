@@ -18,7 +18,7 @@ const BASIC_PASS = "ABC";
 
 // Google Sheets API設定
 const SPREADSHEET_ID = "1pMus9SiW5B26B9rc6lzdG3rc0IkA4lEMkUAwWVqWm4I";
-const API_KEY = "YOUR_API_KEY_HERE"; // 実際のキーに
+const API_KEY = 'AIzaSyCJMJHHiar0P2e6jdWm0HJdGldAaE3b05I'; // 実際のキーに
 
 // 除外シート
 const EXCLUDED_SHEETS = [
