@@ -13,8 +13,8 @@ const { google } = require("googleapis");
 const PORT = process.env.PORT || 3000;
 
 // Basic認証 ID/PW
-const BASIC_USER = "abc";
-const BASIC_PASS = "ABC";
+const BASIC_USER = "NPKK";
+const BASIC_PASS = "0119";
 
 // Google Sheets API設定
 const SPREADSHEET_ID = "1pMus9SiW5B26B9rc6lzdG3rc0IkA4lEMkUAwWVqWm4I";
