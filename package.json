@@ -1,6 +1,6 @@
 
 {
-  "name": "attendance-system",
+  "name": "attendance-system1",
   "version": "1.0.0",
   "description": "BatchGet + BasicAuth + WebSocket + Filter C/F/H + Subtable for Heroku",
   "main": "server.js",

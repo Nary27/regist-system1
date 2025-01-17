@@ -20,8 +20,8 @@ const BASIC_USER = "NPKK";
 const BASIC_PASS = "0119";   
 
 // Google Sheets API設定
-const SPREADSHEET_ID = "16965SUP5Y67N-VYSqnTho5-0ilZs3jw5PkLgrG0qjLA";
-const API_KEY = "'AIzaSyCJMJHHiar0P2e6jdWm0HJdGldAaE3b05I'"; // 実際のAPIキー
+const SPREADSHEET_ID = "1pMus9SiW5B26B9rc6lzdG3rc0IkA4lEMkUAwWVqWm4I";
+const API_KEY = 'AIzaSyCJMJHHiar0P2e6jdWm0HJdGldAaE3b05I'; // 実際のキーに
 
 // 除外するシート
 const EXCLUDED_SHEETS = [
