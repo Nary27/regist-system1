@@ -6,33 +6,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
-      margin: 0; padding: 0;
-      font-family: Arial, sans-serif;
-      background: #fafafa; color: #333;
-      user-select: none; /* コピー不可 */
+      margin:0; padding:0;
+      font-family:Arial, sans-serif;
+      background:#fafafa; color:#333;
+      user-select:none; /* コピー不可 */
     }
     h1 {
-      margin: 1rem 0; text-align: center;
-      user-select: none;
+      margin:1rem 0; text-align:center; user-select:none;
     }
     .tabs {
-      display: flex; border-bottom: 1px solid #ccc;
-      overflow-x: auto; background-color: #f1f1f1;
-      user-select: none;
-    }
-    .tab {
-      padding: 0.8rem; margin: 0 0.2rem;
-      border:1px solid #ccc; border-radius:5px 5px 0 0;
-      background:#e0e0e0; white-space:nowrap;
+      display:flex; border-bottom:1px solid #ccc;
+      overflow-x:auto; background-color:#f1f1f1;
       user-select:none;
     }
+    .tab {
+      padding:0.8rem; margin:0 0.2rem;
+      border:1px solid #ccc; border-radius:5px 5px 0 0;
+      background:#e0e0e0; white-space:nowrap; user-select:none;
+    }
     .tab.active {
-      background:#fff; font-weight:bold;
-      border-bottom:1px solid #fff;
+      background:#fff; font-weight:bold; border-bottom:1px solid #fff;
     }
     .tab-content {
-      display:none; padding:1rem; max-height:70vh;
-      overflow-y:auto; user-select:none;
+      display:none; padding:1rem; max-height:70vh; overflow-y:auto; user-select:none;
     }
     .tab-content.active {
       display:block;
@@ -40,20 +36,14 @@
 
     /* メインテーブル: min-width 1500px */
     table.main-table {
-      width:100%;
-      min-width:1500px;
-      border-collapse:collapse;
-      margin-top:0.5rem;
+      width:100%; min-width:1500px; border-collapse:collapse; margin-top:0.5rem;
     }
-    /* サマリテーブル: min-width 330px */
+    /* サブテーブル: min-width 330px */
     table.summary-table {
-      border-collapse:collapse;
-      margin-top:0.5rem;
-      min-width:330px;
+      border-collapse:collapse; margin-top:0.5rem; min-width:330px;
     }
     th, td {
-      border:1px solid #ddd; padding:0.8rem; text-align:center;
-      user-select:none;
+      border:1px solid #ddd; padding:0.8rem; text-align:center; user-select:none;
     }
     .status-coming { background-color:red; color:#fff; }
     .status-leaving { background-color:blue; color:#fff; }
@@ -61,15 +51,10 @@
     .status-cancelled { background-color:gray; color:#fff; }
 
     @media (max-width:600px) {
-      table.main-table {
-        min-width:1500px;
-      }
-      table.summary-table {
-        min-width:330px;
-      }
+      table.main-table { min-width:1500px; }
+      table.summary-table { min-width:330px; }
       th, td {
-        font-size:0.9rem;
-        padding:0.7rem;
+        font-size:0.9rem; padding:0.7rem;
       }
       /* No列を狭く (最初の列) */
       table.main-table td:nth-of-type(1),
@@ -85,8 +70,8 @@
   <div id="tab-contents"></div>
 
   <script>
-    // Basic認証
-    const BASIC_AUTH = { user: "abc", pass: "ABC" };
+    // Basic認証 (ID=NPKK, PW=0119)
+    const BASIC_AUTH = { user: "NPKK", pass: "0119" };
     function createBasicAuthHeader() {
       const token = btoa(`${BASIC_AUTH.user}:${BASIC_AUTH.pass}`);
       return `Basic ${token}`;
@@ -99,10 +84,8 @@
     }
 
     // Herokuドメイン
-    // https://regist-check-app-d3670d68ff78.herokuapp.com/
-    // WebSocketは wss://regist-check-app-d3670d68ff78.herokuapp.com
     const API_BASE_URL = "https://regist-check-app-d3670d68ff78.herokuapp.com";
-    const WS_URL = "wss://regist-check-app-d3670d68ff78.herokuapp.com";
+    const WS_URL       = "wss://regist-check-app-d3670d68ff78.herokuapp.com";
 
     let debounceTimer = null;
     let lastFetchAllTime = 0;
@@ -118,13 +101,11 @@
       const msg = JSON.parse(evt.data);
       console.log("[WS onmessage]", msg);
       if (msg.type === "sheetUpdated") {
-        // もし 来場数内訳シートなら => 即座に fetchSummaryData()
         if (msg.sheetName === "来場数内訳") {
-          console.log("[sheetUpdated] => subtable only => fetchSummaryData now");
+          // サブテーブルのみ即時更新
           fetchSummaryData();
         } else {
           // それ以外 => デバウンス
-          console.log("[sheetUpdated] => debounce for main table");
           debounceFetchAllData();
         }
       }
@@ -138,7 +119,7 @@
       }, DEBOUNCE_DELAY);
     }
 
-    // main table
+    // メインテーブル
     async function fetchAllDataAtOnce() {
       const now = Date.now();
       if (now - lastFetchAllTime < CACHE_COOLDOWN) {
@@ -161,7 +142,7 @@
       });
     }
 
-    // sub table
+    // サブテーブル
     async function fetchSummaryData() {
       console.log("[fetchSummaryData] start summary-data");
       const res = await authFetch(`${API_BASE_URL}/summary-data`);
@@ -189,7 +170,6 @@
 
     // onLoad
     window.addEventListener("DOMContentLoaded", async () => {
-      // /info
       const infoRes = await authFetch(`${API_BASE_URL}/info`);
       if (!infoRes.ok) {
         console.error("[DOMContentLoaded] /info error:", infoRes.status);
@@ -199,7 +179,6 @@
       document.getElementById("page-title").textContent = info.title || "スプレッドシート";
 
       createTabs(info.sheetNames);
-
       await fetchAllDataAtOnce();
       await fetchSummaryData();
 
@@ -240,8 +219,9 @@
 
       // シートタブ(1..)
       sheetNames.forEach((sName, i) => {
-        const realIndex = i + 1;
+        const realIndex = i+1;
         const div = document.getElementById(`content-${realIndex}`);
+
         // 列順: No->状態->DR氏名->空->フリガナ->施設名->備考->来場時間->退場時間->地域区分
         div.innerHTML = `
           <div class="table-wrapper">

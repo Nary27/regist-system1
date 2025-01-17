@@ -9,22 +9,25 @@ const http = require("http");
 const WebSocket = require("ws");
 const { google } = require("googleapis");
 
-// ====== Herokuで単一ポート ======
+// ========== Herokuで単一ポート ==========
 const PORT = process.env.PORT || 3000;
 
-// Basic認証 ID/PW
-const BASIC_USER = "npkk";
-const BASIC_PASS = "0119";
+/**
+ * ★変更箇所★
+ * Basic認証 ID/PW を (ID=NPKK, PW=0119) に変更
+ */
+const BASIC_USER = "NPKK";   
+const BASIC_PASS = "0119";   
 
 // Google Sheets API設定
-const SPREADSHEET_ID = "1pMus9SiW5B26B9rc6lzdG3rc0IkA4lEMkUAwWVqWm4I";
-const API_KEY = 'AIzaSyCJMJHHiar0P2e6jdWm0HJdGldAaE3b05I'; // 実際のキーに
+const SPREADSHEET_ID = "16965SUP5Y67N-VYSqnTho5-0ilZs3jw5PkLgrG0qjLA";
+const API_KEY = "YOUR_API_KEY_HERE"; // 実際のAPIキー
 
 // 除外するシート
 const EXCLUDED_SHEETS = [
   "データまとめ",
   "営業所分類",
-  "来場数内訳", // タブには表示しないがサブテーブル表示で使う
+  "来場数内訳",
   "リーダー",
   "履歴"
 ];
@@ -41,6 +44,7 @@ app.use((req, res, next) => {
   const base64Credentials = authHeader.split(" ")[1];
   const decoded = Buffer.from(base64Credentials, "base64").toString();
   const [user, pass] = decoded.split(":");
+  // ★ここで NPKK:0119 をチェック
   if (user === BASIC_USER && pass === BASIC_PASS) {
     next();
   } else {
@@ -100,7 +104,7 @@ async function getMultipleSheetsData(sheetNames) {
           return !isAllEmpty;
         })
         .map(row => {
-          // B=0, C=1, D=2, E=3, F=4, G=5, H=6, I=7, ...
+          // B=0, C=1, D=2, E=3, F=4, G=5, H=6, ...
           const colC = row[1] || "";
           const colF = row[4] || "";
           const colH = row[6] || "";
@@ -122,7 +126,7 @@ async function getMultipleSheetsData(sheetNames) {
           };
         });
 
-      // 全体シート => C,F,Hいずれか空なら除外
+      // "全体"シート => C,F,Hがいずれか空なら除外
       if (sheetName === "全体(あいうえお順)") {
         parsed = parsed.filter(r => {
           if (!r.colC.trim() || !r.colF.trim() || !r.colH.trim()) {
@@ -209,11 +213,10 @@ app.post("/api/sheetUpdate", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
-// 単一ポートで HTTP + WebSocket
+// HTTP + WebSocket 同居 (単一ポート)
 const httpServer = http.createServer(app);
 const wss = new WebSocket.Server({ server: httpServer });
 
-// リッスン
 httpServer.listen(PORT, () => {
   console.log(`Server & WS running on port ${PORT}`);
 });
