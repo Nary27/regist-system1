@@ -123,7 +123,7 @@ async function getMultipleSheetsData(sheetNames) {
         });
 
       // 全体シート => C,F,Hいずれか空なら除外
-      if (sheetName === "全体") {
+      if (sheetName === "全体(あいうえお順)") {
         parsed = parsed.filter(r => {
           if (!r.colC.trim() || !r.colF.trim() || !r.colH.trim()) {
             return false;
