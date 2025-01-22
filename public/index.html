@@ -1,314 +1,292 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>受付確認システム</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body {
-      margin:0; padding:0;
-      font-family:Arial, sans-serif;
-      background:#fafafa; color:#333;
-      user-select:none; /* コピー不可 */
-    }
-    h1 {
-      margin:1rem 0; text-align:center; user-select:none;
-    }
-    .tabs {
-      display:flex; border-bottom:1px solid #ccc;
-      overflow-x:auto; background-color:#f1f1f1;
-      user-select:none;
-    }
-    .tab {
-      padding:0.8rem; margin:0 0.2rem;
-      border:1px solid #ccc; border-radius:5px 5px 0 0;
-      background:#e0e0e0; white-space:nowrap; user-select:none;
-    }
-    .tab.active {
-      background:#fff; font-weight:bold; border-bottom:1px solid #fff;
-    }
-    .tab-content {
-      display:none; padding:1rem; max-height:70vh; overflow-y:auto; user-select:none;
-    }
-    .tab-content.active {
-      display:block;
-    }
-
-    /* メインテーブル: min-width 1500px */
-    table.main-table {
-      width:100%; min-width:1500px; border-collapse:collapse; margin-top:0.5rem;
-    }
-    /* サブテーブル: min-width 330px */
-    table.summary-table {
-      border-collapse:collapse; margin-top:0.5rem; min-width:330px;
-    }
-    th, td {
-      border:1px solid #ddd; padding:0.8rem; text-align:center; user-select:none;
-    }
-    .status-coming { background-color:red; color:#fff; }
-    .status-leaving { background-color:blue; color:#fff; }
-    .status-not-arrived { background-color:#fff; color:#000; }
-    .status-cancelled { background-color:gray; color:#fff; }
-
+    body { margin:0; padding:0; font-family:Arial, sans-serif; background:#fafafa; color:#333; user-select:none;}
+    h1 { margin:1rem 0; text-align:center; }
+    .main-buttons { display:flex; gap:0.5rem; justify-content:center; margin-bottom:0.5rem; flex-wrap:wrap;}
+    .main-button { padding:0.8rem 1.2rem; background:#ddd; border:2px solid #666; border-radius:5px; cursor:pointer; font-weight:bold;}
+    .main-button.active { background:peachpuff; border-color:#333;}
+    .sub-buttons { display:flex; gap:0.5rem; flex-wrap:wrap; justify-content:center; margin-bottom:1rem;}
+    .sub-button { padding:0.5rem 1rem; background:#eee; border:2px solid #666; border-radius:5px; cursor:pointer; font-size:0.9rem;}
+    .sub-button.active { background:#ffc; border-color:#333;}
+    #subSelect { display:none; margin:0 auto; margin-bottom:1rem; max-width:300px; font-size:1rem;}
+    .table-container { width:95%; margin:0 auto; overflow-x:auto;}
+    table { width:100%; min-width:1500px; border-collapse:collapse; margin-top:0.5rem;}
+    th, td { border:1px solid #ddd; padding:0.8rem; text-align:center;}
+    .status-coming { background-color:#F0f080; color:#000;}
+    .status-leaving { background-color:#0073a8; color:#000;}
+    .status-not-arrived { background-color:#fff; color:#000;}
+    .status-cancelled { background-color:gray; color:#fff;}
     @media (max-width:600px) {
-      table.main-table { min-width:580px; }
-      table.summary-table { min-width:330px; }
-      th, td {
-        font-size:0.4rem; padding:0.2rem;
-      }
-      /* No列を狭く (最初の列) */
-      table.main-table td:nth-of-type(1),
-      table.main-table th:nth-of-type(1) {
-        width:0px;
-      }
+      table { min-width:600px;}
+      th, td { font-size:0.5rem; padding:0.3rem;}
+    }
+    .summary-table { border-collapse:collapse; margin-top:1rem; min-width:300px; max-width:620px; margin:0 auto;}
+    .summary-table th, .summary-table td {
+      border:1px solid #aaa; padding:0.5rem; text-align:center;
     }
   </style>
 </head>
 <body>
   <h1 id="page-title">Loading...</h1>
-  <div class="tabs" id="tabs"></div>
-  <div id="tab-contents"></div>
+
+  <div class="main-buttons" id="main-buttons">
+    <div class="main-button" data-mode="menu">メニュー</div>
+    <div class="main-button" data-mode="all-aiueo">全体(あいうえお順)</div>
+    <div class="main-button" data-mode="all-area">全体(エリア順)</div>
+    <div class="main-button" data-mode="npkk">NPKK</div>
+    <div class="main-button" data-mode="os">OS</div>
+  </div>
+  
+  <div class="sub-buttons" id="sub-buttons"></div>
+  <select id="subSelect"></select>
+
+  <!-- メインテーブル表示領域 -->
+  <div class="table-container" id="table-container"></div>
+  <!-- メニュー時に来場数内訳テーブルを表示 -->
+  <div id="summary-table-area" style="width:95%; margin:0 auto;"></div>
 
   <script>
-    // Basic認証 (ID=NPKK, PW=0119)
-    const BASIC_AUTH = { user: "NPKK", pass: "0119" };
-    function createBasicAuthHeader() {
-      const token = btoa(`${BASIC_AUTH.user}:${BASIC_AUTH.pass}`);
-      return `Basic ${token}`;
-    }
-    async function authFetch(url, options={}) {
-      const headers = options.headers || {};
-      headers["Authorization"] = createBasicAuthHeader();
-      options.headers = headers;
-      return fetch(url, options);
-    }
+    let allSheetNames = [];
+    let allData = {};
 
-    // Herokuドメイン
-    const API_BASE_URL = "https://regist-check-app-d3670d68ff78.herokuapp.com";
-    const WS_URL       = "wss://regist-check-app-d3670d68ff78.herokuapp.com";
+    let currentMainMode = "menu";
+    let currentSubSheet = "";
 
-    let debounceTimer = null;
-    let lastFetchAllTime = 0;
-    const DEBOUNCE_DELAY = 2000;  // 2秒
-    const CACHE_COOLDOWN = 5000;  // 5秒
-
-    // WebSocket
-    const ws = new WebSocket(WS_URL);
-    ws.onopen = () => {
-      console.log("[WebSocket] connected to", WS_URL);
-    };
-    ws.onmessage = (evt) => {
-      const msg = JSON.parse(evt.data);
-      console.log("[WS onmessage]", msg);
-      if (msg.type === "sheetUpdated") {
-        if (msg.sheetName === "来場数内訳") {
-          // サブテーブルのみ即時更新
-          fetchSummaryData();
-        } else {
-          // それ以外 => デバウンス
-          debounceFetchAllData();
-        }
-      }
-    };
-
-    function debounceFetchAllData() {
-      if (debounceTimer) clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => {
-        fetchAllDataAtOnce();
-        fetchSummaryData();
-      }, DEBOUNCE_DELAY);
-    }
-
-    // メインテーブル
-    async function fetchAllDataAtOnce() {
-      const now = Date.now();
-      if (now - lastFetchAllTime < CACHE_COOLDOWN) {
-        console.log("[fetchAllDataAtOnce] Skipped due to COOL DOWN");
-        return;
-      }
-      lastFetchAllTime = now;
-
-      console.log("[fetchAllDataAtOnce] start batch-data");
-      const res = await authFetch(`${API_BASE_URL}/batch-data`);
-      if (!res.ok) {
-        console.error("[fetchAllDataAtOnce] error", res.status);
-        return;
-      }
-      const allData = await res.json();
-      console.log("[fetchAllDataAtOnce] allData=", allData);
-
-      Object.keys(allData).forEach(sheetName => {
-        updateTable(sheetName, allData[sheetName]);
-      });
-    }
-
-    // サブテーブル
-    async function fetchSummaryData() {
-      console.log("[fetchSummaryData] start summary-data");
-      const res = await authFetch(`${API_BASE_URL}/summary-data`);
-      if (!res.ok) {
-        console.error("[fetchSummaryData] error", res.status);
-        return;
-      }
-      const tableData = await res.json();
-      console.log("[fetchSummaryData] tableData=", tableData);
-
-      const summaryDiv = document.getElementById("summary-table-area");
-      if (!summaryDiv) return;
-
-      let html = `<table class="summary-table">`;
-      tableData.forEach(rowArr => {
-        html += "<tr>";
-        rowArr.forEach(cell => {
-          html += `<td>${cell||""}</td>`;
-        });
-        html += "</tr>";
-      });
-      html += "</table>";
-      summaryDiv.innerHTML = html;
-    }
-
-    // onLoad
     window.addEventListener("DOMContentLoaded", async () => {
-      const infoRes = await authFetch(`${API_BASE_URL}/info`);
-      if (!infoRes.ok) {
-        console.error("[DOMContentLoaded] /info error:", infoRes.status);
-        return;
-      }
+      // 1) /info
+      const infoRes = await fetch("/info"); // ★ 相対パス
       const info = await infoRes.json();
       document.getElementById("page-title").textContent = info.title || "スプレッドシート";
+      allSheetNames = info.sheetNames || [];
 
-      createTabs(info.sheetNames);
-      await fetchAllDataAtOnce();
-      await fetchSummaryData();
+      // 2) /batch-data
+      await fetchAllData();
 
-      const savedIndex = localStorage.getItem("activeTabIndex");
-      if (savedIndex !== null) {
-        const idx = parseInt(savedIndex, 10);
-        if (!isNaN(idx)) setActiveTab(idx);
-        else setActiveTab(0);
+      // localStorage
+      const savedMainMode = localStorage.getItem("activeMainMode");
+      const savedSubSheet = localStorage.getItem("activeSubSheet");
+
+      if (savedMainMode && allSheetNames) {
+        setMainMode(savedMainMode);
       } else {
-        setActiveTab(0);
+        setMainMode("menu");
+      }
+      highlightActiveMainButton(currentMainMode);
+      renderSubButtons(currentMainMode);
+
+      if (savedSubSheet && allSheetNames.includes(savedSubSheet)) {
+        handleSubButtonClick(savedSubSheet, false);
+      } else {
+        if (currentMainMode==="menu") {
+          await showSummaryTable();
+        }
       }
     });
 
-    function createTabs(sheetNames) {
-      const tabsContainer = document.getElementById("tabs");
-      const contentsContainer = document.getElementById("tab-contents");
-
-      const newNames = ["メニュー", ...sheetNames];
-      newNames.forEach((name, idx) => {
-        const tab = document.createElement("div");
-        tab.classList.add("tab");
-        tab.textContent = name;
-        tab.addEventListener("click", () => setActiveTab(idx));
-        tabsContainer.appendChild(tab);
-
-        const contentDiv = document.createElement("div");
-        contentDiv.classList.add("tab-content");
-        contentDiv.id = `content-${idx}`;
-        contentsContainer.appendChild(contentDiv);
-      });
-
-      // メニュータブ(0)
-      const menuDiv = document.getElementById("content-0");
-      menuDiv.innerHTML = `
-        ${createMenuContentHTML(sheetNames)}
-        <div id="summary-table-area" style="margin-top:1rem;"></div>
-      `;
-
-      // シートタブ(1..)
-      sheetNames.forEach((sName, i) => {
-        const realIndex = i+1;
-        const div = document.getElementById(`content-${realIndex}`);
-
-        // 列順: No->状態->DR氏名->空->フリガナ->施設名->備考->来場時間->退場時間->地域区分
-        div.innerHTML = `
-          <div class="table-wrapper">
-            <table class="main-table">
-              <thead>
-                <tr>
-                  <th>No</th>
-                  <th>状態</th>
-                  <th>DR氏名</th>
-                  <th></th>
-                  <th>フリガナ</th>
-                  <th>施設名</th>
-                  <th>備考</th>
-                  <th>ご来場時間</th>
-                  <th>ご退場時間</th>
-                  <th>地域区分</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        `;
-      });
-
-      window._sheetNames = sheetNames;
+    async function fetchAllData() {
+      const res = await fetch("/batch-data"); // ★ 相対パス
+      if (!res.ok) {
+        console.error("[fetchAllData] error", res.status);
+        return;
+      }
+      allData = await res.json();
+      console.log("[fetchAllData] allData=", allData);
     }
 
-    function createMenuContentHTML(sheetNames) {
-      let html = `<p><strong>シートを選択してください</strong></p>`;
-      sheetNames.forEach((name, i) => {
-        html += `
-          <button style="margin:0.5rem; padding:0.8rem;" onclick="setActiveTab(${i+1})">
-            ${name}
-          </button>
-        `;
+    async function showSummaryTable() {
+      const summaryArea = document.getElementById("summary-table-area");
+      summaryArea.innerHTML = "";
+
+      const res = await fetch("/summary-data"); // ★ 相対パス
+      if (!res.ok) {
+        summaryArea.innerHTML = "<p>来場数内訳取得エラー</p>";
+        return;
+      }
+      const tableData = await res.json();
+      if (tableData.length === 0) {
+        summaryArea.innerHTML = "<p>来場数内訳がありません</p>";
+        return;
+      }
+
+      let html = `<table class="summary-table"><tbody>`;
+      tableData.forEach(row => {
+        html += "<tr>";
+        // 特殊処理: "総来場者数(新規含む)"なら文字拡大
+        if (row[0]==="総来場者数(新規含む)" && row.length>=2) {
+          html += `<td style="font-size:1.2rem; font-weight:bold;">${row[0]}</td>`;
+          html += `<td style="font-size:1.2rem; font-weight:bold;">${row[1]}</td>`;
+          for (let c=2; c<row.length; c++) {
+            html += `<td>${row[c]}</td>`;
+          }
+        } else {
+          row.forEach(cell => {
+            html += `<td>${cell}</td>`;
+          });
+        }
+        html += "</tr>";
       });
-      return html;
+      html += "</tbody></table>";
+      summaryArea.innerHTML = html;
     }
 
-    function setActiveTab(index) {
-      const tabs = document.querySelectorAll(".tab");
-      const contents = document.querySelectorAll(".tab-content");
-      tabs.forEach(t => t.classList.remove("active"));
-      contents.forEach(c => c.classList.remove("active"));
+    document.getElementById("main-buttons").addEventListener("click", async (e) => {
+      const btn = e.target.closest(".main-button");
+      if (!btn) return;
+      const mode = btn.dataset.mode;
+      setMainMode(mode);
+      highlightActiveMainButton(mode);
+      renderSubButtons(mode);
 
-      if (index >= 0 && index < tabs.length) {
-        tabs[index].classList.add("active");
-        contents[index].classList.add("active");
-        localStorage.setItem("activeTabIndex", index);
+      if (mode==="menu") {
+        await showSummaryTable();
+      } else {
+        document.getElementById("summary-table-area").innerHTML="";
+      }
+    });
+
+    function setMainMode(mode) {
+      currentMainMode = mode;
+      localStorage.setItem("activeMainMode", mode);
+      currentSubSheet = "";
+      localStorage.removeItem("activeSubSheet");
+      document.getElementById("table-container").innerHTML="";
+    }
+
+    function highlightActiveMainButton(mode) {
+      document.querySelectorAll(".main-button").forEach(mBtn => {
+        mBtn.classList.remove("active");
+        if (mBtn.dataset.mode===mode) {
+          mBtn.classList.add("active");
+        }
+      });
+    }
+
+    function renderSubButtons(mode) {
+      const subContainer = document.getElementById("sub-buttons");
+      const subSelect = document.getElementById("subSelect");
+      subContainer.innerHTML = "";
+      subSelect.innerHTML = "";
+
+      let filtered = [];
+      if (mode==="menu") {
+        filtered = [...allSheetNames];
+      } else if (mode==="all-aiueo") {
+        filtered = allSheetNames.filter(n => n.includes("全体(あいうえお順)"));
+      } else if (mode==="all-area") {
+        filtered = allSheetNames.filter(n => n.includes("全体(エリア順)"));
+      } else if (mode==="npkk") {
+        filtered = allSheetNames.filter(n => n.startsWith("N."));
+      } else if (mode==="os") {
+        filtered = allSheetNames.filter(n => n.startsWith("O."));
+      }
+
+      const isMobile = (window.innerWidth <= 600);
+      if (mode==="menu" && isMobile) {
+        subContainer.style.display="none";
+        subSelect.style.display="inline-block";
+        const placeholderOpt=document.createElement("option");
+        placeholderOpt.value="";
+        placeholderOpt.textContent="▼シートを選択";
+        subSelect.appendChild(placeholderOpt);
+
+        filtered.forEach(sheetName=>{
+          const opt=document.createElement("option");
+          opt.value=sheetName;
+          opt.textContent=sheetName;
+          subSelect.appendChild(opt);
+        });
+        subSelect.onchange=(e)=>{
+          const val=e.target.value;
+          if(!val)return;
+          handleSubButtonClick(val);
+        };
+      } else {
+        subContainer.style.display="flex";
+        subSelect.style.display="none";
+        filtered.forEach(sheetName=>{
+          const b=document.createElement("div");
+          b.classList.add("sub-button");
+          b.textContent=sheetName;
+          b.onclick=()=>handleSubButtonClick(sheetName);
+          subContainer.appendChild(b);
+        });
       }
     }
 
-    function updateTable(sheetName, data) {
-      if (!window._sheetNames) return;
-      const idx = window._sheetNames.indexOf(sheetName);
-      if (idx < 0) return;
-      const tabIndex = idx + 1;
-      const tableBody = document.querySelector(`#content-${tabIndex} tbody`);
-      if (!tableBody) return;
+    function handleSubButtonClick(sheetName, store=true) {
+      highlightActiveSubButton(sheetName);
+      currentSubSheet=sheetName;
+      if(store) localStorage.setItem("activeSubSheet", sheetName);
+      renderTable(sheetName);
+    }
 
-      console.log("[updateTable]", sheetName, data);
-      tableBody.innerHTML = "";
+    function highlightActiveSubButton(sheetName) {
+      document.querySelectorAll(".sub-button").forEach(btn=>{
+        btn.classList.remove("active");
+        if(btn.textContent===sheetName){
+          btn.classList.add("active");
+        }
+      });
+    }
 
-      data.forEach(row => {
+    function renderTable(sheetName) {
+      const container = document.getElementById("table-container");
+      container.innerHTML="";
+
+      const data = allData[sheetName]||[];
+      if(data.length===0){
+        container.innerHTML="<p>該当データがありません。</p>";
+        return;
+      }
+      const table=document.createElement("table");
+      const thead=document.createElement("thead");
+      thead.innerHTML=`
+      <tr>
+        <th>No</th>
+        <th>状態</th>
+        <th>DR氏名</th>
+        <th></th>
+        <th>フリガナ</th>
+        <th>施設名</th>
+        <th>備考</th>
+        <th>ご来場時間</th>
+        <th>ご退場時間</th>
+        <th>地域区分</th>
+      </tr>
+      `;
+      table.appendChild(thead);
+
+      const tbody=document.createElement("tbody");
+      data.forEach(row=>{
         const {
           no, arrival, departure, drName, gBlank,
-          furigana, facility, remarks, arrivalTime,
-          departureTime, region, canceledByO
-        } = row;
+          furigana, facility, remarks,
+          arrivalTime, departureTime, region,
+          canceledByO
+        }=row;
 
-        let statusClass = "status-not-arrived";
-        let statusText = "未入場";
-        if (arrival === "true" && departure === "false") {
-          statusClass = "status-coming";
-          statusText = "来場中";
-        } else if (departure === "true") {
-          statusClass = "status-leaving";
-          statusText = "退場済み";
+        let statusClass="status-not-arrived";
+        let statusText="未入場";
+        if(arrival==="true" && departure==="false"){
+          statusClass="status-coming";
+          statusText="来場中";
+        } else if(departure==="true"){
+          statusClass="status-leaving";
+          statusText="退場済み";
         }
-        if (canceledByO) {
-          statusClass = "status-cancelled";
-          statusText = "キャンセル";
+        if(canceledByO){
+          statusClass="status-cancelled";
+          statusText="キャンセル";
         }
 
-        const tr = document.createElement("tr");
+        const tr=document.createElement("tr");
         tr.classList.add(statusClass);
-        tr.innerHTML = `
+        tr.innerHTML=`
           <td>${no||""}</td>
           <td>${statusText}</td>
           <td>${drName||""}</td>
@@ -320,8 +298,10 @@
           <td>${departureTime||""}</td>
           <td>${region||""}</td>
         `;
-        tableBody.appendChild(tr);
+        tbody.appendChild(tr);
       });
+      table.appendChild(tbody);
+      container.appendChild(table);
     }
   </script>
 </body>
