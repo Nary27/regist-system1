@@ -1,5 +1,5 @@
 /*************************************
- * server.js (Heroku-ready, polling approach)
+ * server.js (Heroku-ready)
  *************************************/
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -9,13 +9,14 @@ const http = require("http");
 const { google } = require("googleapis");
 const WebSocket = require("ws");
 
-// ★ Heroku環境 or ローカル
+// ★ Heroku環境では process.env.PORT を使用
 const PORT = process.env.PORT || 3000;
 
-// スプレッドシート設定
+// ★ スプレッドシートID と API_KEY
 const SPREADSHEET_ID = "1hMKTxFPIliPWGDt4auIbRq8wGJYCu_-0DKXujqvV4gw";
 const API_KEY = "AIzaSyCJMJHHiar0P2e6jdWm0HJdGldAaE3b05I";
 
+// 除外シート
 const EXCLUDED_SHEETS = [
   "データまとめ",
   "営業所分類",
@@ -28,10 +29,11 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// 静的ファイル
+// 静的ファイル (index.html等) → buildパック or ルート直下
+// ここでは "public" フォルダを使う想定
 app.use(express.static(path.join(__dirname, "public")));
 
-// Google Sheets 関数
+/** Google Sheets関連関数 **/
 async function getSpreadsheetInfo() {
   const sheets = google.sheets({ version: "v4" });
   try {
@@ -41,6 +43,7 @@ async function getSpreadsheetInfo() {
     });
     const title = resp.data.properties.title;
     let sheetNames = resp.data.sheets.map(s => s.properties.title);
+    // 除外
     sheetNames = sheetNames.filter(name => !EXCLUDED_SHEETS.includes(name));
     return { title, sheetNames };
   } catch (err) {
@@ -53,6 +56,7 @@ async function getMultipleSheetsData(sheetNames) {
   if (!sheetNames || sheetNames.length === 0) return {};
   const sheets = google.sheets({ version: "v4" });
   const ranges = sheetNames.map(name => `${name}!B2:O`);
+
   try {
     const resp = await sheets.spreadsheets.values.batchGet({
       spreadsheetId: SPREADSHEET_ID,
@@ -68,7 +72,6 @@ async function getMultipleSheetsData(sheetNames) {
       const rawData = vr.values || [];
 
       let parsed = rawData.slice(1).map(row => {
-        // B=0, C=1, D=2, ... N=12
         const no = row[0] || "";
         const rawArr  = (row[1] || "").toUpperCase();
         const rawDep  = (row[2] || "").toUpperCase();
@@ -77,15 +80,14 @@ async function getMultipleSheetsData(sheetNames) {
         const furigana= row[5] || "";
         const facility= row[6] || "";
         const remarks = row[7] || "";
-        const arrTime = row[9]  || "";
-        const depTime = row[10] || "";
-        const region  = row[11] || "";
-        const rawCancel = (row[12] || "").toUpperCase();
-
+        const arrTime = row[9] || "";
+        const depTime = row[10]|| "";
+        const region  = row[11]|| "";
+        const rawCancel= (row[12]||"").toUpperCase();
         return {
           no,
-          arrival    : rawArr==="TRUE" ? "true":"false",
-          departure  : rawDep==="TRUE" ? "true":"false",
+          arrival    : rawArr==="TRUE"?"true":"false",
+          departure  : rawDep==="TRUE"?"true":"false",
           drName,
           gBlank,
           furigana,
@@ -126,7 +128,7 @@ async function getSummaryData() {
   }
 }
 
-// ルート
+/** エンドポイント **/
 app.get("/info", async (req, res) => {
   console.log("[GET /info]");
   const info = await getSpreadsheetInfo();
@@ -156,16 +158,26 @@ app.get("/summary-data", async (req, res) => {
   }
 });
 
-/** 
- * ★ Webhookは使用しない → 削除 or 無効化
- * app.post("/api/sheetUpdate", ...) 
- * 代わりにポーリング 
- */
+/** Webhook **/
+app.post("/api/sheetUpdate", (req, res) => {
+  console.log("[POST /api/sheetUpdate] body=", req.body);
+  wss.clients.forEach(client => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify({
+        type: "sheetUpdated",
+        sheetName: req.body.sheetName,
+        range: req.body.range,
+        newValue: req.body.newValue
+      }));
+    }
+  });
+  res.status(200).json({ status: "ok" });
+});
 
-// HTTP + WebSocket (もし不要ならWebSocketも削除可)
+/** WebSocket & HTTP **/
 const httpServer = http.createServer(app);
 const wss = new WebSocket.Server({ server: httpServer });
 
 httpServer.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server & WS running on port ${PORT}`);
 });
