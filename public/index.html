@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { margin:0; padding:0; font-family:Arial, sans-serif; background:#fafafa; color:#333; user-select:none;}
-    h1 { margin:1rem 0; text-align:center; }
+    h1 { margin:1rem 0; text-align:center;}
     .main-buttons { display:flex; gap:0.5rem; justify-content:center; margin-bottom:0.5rem; flex-wrap:wrap;}
     .main-button { padding:0.8rem 1.2rem; background:#ddd; border:2px solid #666; border-radius:5px; cursor:pointer; font-weight:bold;}
     .main-button.active { background:peachpuff; border-color:#333;}
@@ -45,9 +45,7 @@
   <div class="sub-buttons" id="sub-buttons"></div>
   <select id="subSelect"></select>
 
-  <!-- メインテーブル表示領域 -->
   <div class="table-container" id="table-container"></div>
-  <!-- メニュー時に来場数内訳テーブルを表示 -->
   <div id="summary-table-area" style="width:95%; margin:0 auto;"></div>
 
   <script>
@@ -59,12 +57,12 @@
 
     window.addEventListener("DOMContentLoaded", async () => {
       // 1) /info
-      const infoRes = await fetch("/info"); // ★ 相対パス
+      const infoRes = await fetch("/info");
       const info = await infoRes.json();
       document.getElementById("page-title").textContent = info.title || "スプレッドシート";
       allSheetNames = info.sheetNames || [];
 
-      // 2) /batch-data
+      // 2) batch-data
       await fetchAllData();
 
       // localStorage
@@ -86,10 +84,26 @@
           await showSummaryTable();
         }
       }
+
+      // ★ 3) 10秒ごとにポーリング
+      setInterval(async () => {
+        console.log("[polling] start");
+        await fetchAllData();
+        // batch-data が更新された → 再描画
+        if (currentMainMode === "menu") {
+          // メニューのとき summaryData も更新
+          await showSummaryTable();
+        } else {
+          // subSheetがあれば再描画
+          if (currentSubSheet) {
+            renderTable(currentSubSheet);
+          }
+        }
+      }, 10000);
     });
 
     async function fetchAllData() {
-      const res = await fetch("/batch-data"); // ★ 相対パス
+      const res = await fetch("/batch-data");
       if (!res.ok) {
         console.error("[fetchAllData] error", res.status);
         return;
@@ -102,91 +116,88 @@
       const summaryArea = document.getElementById("summary-table-area");
       summaryArea.innerHTML = "";
 
-      const res = await fetch("/summary-data"); // ★ 相対パス
-      if (!res.ok) {
-        summaryArea.innerHTML = "<p>来場数内訳取得エラー</p>";
+      const res = await fetch("/summary-data");
+      if(!res.ok) {
+        summaryArea.innerHTML="<p>来場数内訳取得エラー</p>";
         return;
       }
-      const tableData = await res.json();
-      if (tableData.length === 0) {
-        summaryArea.innerHTML = "<p>来場数内訳がありません</p>";
+      const tableData=await res.json();
+      if(tableData.length===0){
+        summaryArea.innerHTML="<p>来場数内訳がありません</p>";
         return;
       }
-
-      let html = `<table class="summary-table"><tbody>`;
-      tableData.forEach(row => {
-        html += "<tr>";
+      let html=`<table class="summary-table"><tbody>`;
+      tableData.forEach(row=>{
+        html+="<tr>";
         // 特殊処理: "総来場者数(新規含む)"なら文字拡大
-        if (row[0]==="総来場者数(新規含む)" && row.length>=2) {
-          html += `<td style="font-size:1.2rem; font-weight:bold;">${row[0]}</td>`;
-          html += `<td style="font-size:1.2rem; font-weight:bold;">${row[1]}</td>`;
-          for (let c=2; c<row.length; c++) {
+        if(row[0]==="総来場者数(新規含む)" && row.length>=2) {
+          html += `<td style="font-size:1.2rem;font-weight:bold;">${row[0]}</td>`;
+          html += `<td style="font-size:1.2rem;font-weight:bold;">${row[1]}</td>`;
+          for(let c=2;c<row.length;c++){
             html += `<td>${row[c]}</td>`;
           }
         } else {
-          row.forEach(cell => {
-            html += `<td>${cell}</td>`;
+          row.forEach(cell=>{
+            html+=`<td>${cell}</td>`;
           });
         }
-        html += "</tr>";
+        html+="</tr>";
       });
-      html += "</tbody></table>";
-      summaryArea.innerHTML = html;
+      html+="</tbody></table>";
+      summaryArea.innerHTML=html;
     }
 
     document.getElementById("main-buttons").addEventListener("click", async (e) => {
-      const btn = e.target.closest(".main-button");
-      if (!btn) return;
-      const mode = btn.dataset.mode;
+      const btn=e.target.closest(".main-button");
+      if(!btn)return;
+      const mode=btn.dataset.mode;
       setMainMode(mode);
       highlightActiveMainButton(mode);
       renderSubButtons(mode);
 
-      if (mode==="menu") {
+      if(mode==="menu"){
         await showSummaryTable();
       } else {
         document.getElementById("summary-table-area").innerHTML="";
       }
     });
 
-    function setMainMode(mode) {
-      currentMainMode = mode;
+    function setMainMode(mode){
+      currentMainMode=mode;
       localStorage.setItem("activeMainMode", mode);
-      currentSubSheet = "";
+      currentSubSheet="";
       localStorage.removeItem("activeSubSheet");
       document.getElementById("table-container").innerHTML="";
     }
-
-    function highlightActiveMainButton(mode) {
-      document.querySelectorAll(".main-button").forEach(mBtn => {
+    function highlightActiveMainButton(mode){
+      document.querySelectorAll(".main-button").forEach(mBtn=>{
         mBtn.classList.remove("active");
-        if (mBtn.dataset.mode===mode) {
+        if(mBtn.dataset.mode===mode){
           mBtn.classList.add("active");
         }
       });
     }
+    function renderSubButtons(mode){
+      const subContainer=document.getElementById("sub-buttons");
+      const subSelect=document.getElementById("subSelect");
+      subContainer.innerHTML="";
+      subSelect.innerHTML="";
 
-    function renderSubButtons(mode) {
-      const subContainer = document.getElementById("sub-buttons");
-      const subSelect = document.getElementById("subSelect");
-      subContainer.innerHTML = "";
-      subSelect.innerHTML = "";
-
-      let filtered = [];
-      if (mode==="menu") {
-        filtered = [...allSheetNames];
-      } else if (mode==="all-aiueo") {
-        filtered = allSheetNames.filter(n => n.includes("全体(あいうえお順)"));
-      } else if (mode==="all-area") {
-        filtered = allSheetNames.filter(n => n.includes("全体(エリア順)"));
-      } else if (mode==="npkk") {
-        filtered = allSheetNames.filter(n => n.startsWith("N."));
-      } else if (mode==="os") {
-        filtered = allSheetNames.filter(n => n.startsWith("O."));
+      let filtered=[];
+      if(mode==="menu"){
+        filtered=[...allSheetNames];
+      } else if(mode==="all-aiueo"){
+        filtered=allSheetNames.filter(n=>n.includes("全体(あいうえお順)"));
+      } else if(mode==="all-area"){
+        filtered=allSheetNames.filter(n=>n.includes("全体(エリア順)"));
+      } else if(mode==="npkk"){
+        filtered=allSheetNames.filter(n=>n.startsWith("N."));
+      } else if(mode==="os"){
+        filtered=allSheetNames.filter(n=>n.startsWith("O."));
       }
 
-      const isMobile = (window.innerWidth <= 600);
-      if (mode==="menu" && isMobile) {
+      const isMobile=(window.innerWidth<=600);
+      if(mode==="menu"&&isMobile){
         subContainer.style.display="none";
         subSelect.style.display="inline-block";
         const placeholderOpt=document.createElement("option");
@@ -218,14 +229,13 @@
       }
     }
 
-    function handleSubButtonClick(sheetName, store=true) {
+    function handleSubButtonClick(sheetName, store=true){
       highlightActiveSubButton(sheetName);
       currentSubSheet=sheetName;
       if(store) localStorage.setItem("activeSubSheet", sheetName);
       renderTable(sheetName);
     }
-
-    function highlightActiveSubButton(sheetName) {
+    function highlightActiveSubButton(sheetName){
       document.querySelectorAll(".sub-button").forEach(btn=>{
         btn.classList.remove("active");
         if(btn.textContent===sheetName){
@@ -233,12 +243,11 @@
         }
       });
     }
-
-    function renderTable(sheetName) {
-      const container = document.getElementById("table-container");
+    function renderTable(sheetName){
+      const container=document.getElementById("table-container");
       container.innerHTML="";
 
-      const data = allData[sheetName]||[];
+      const data=allData[sheetName]||[];
       if(data.length===0){
         container.innerHTML="<p>該当データがありません。</p>";
         return;
@@ -246,18 +255,18 @@
       const table=document.createElement("table");
       const thead=document.createElement("thead");
       thead.innerHTML=`
-      <tr>
-        <th>No</th>
-        <th>状態</th>
-        <th>DR氏名</th>
-        <th></th>
-        <th>フリガナ</th>
-        <th>施設名</th>
-        <th>備考</th>
-        <th>ご来場時間</th>
-        <th>ご退場時間</th>
-        <th>地域区分</th>
-      </tr>
+        <tr>
+          <th>No</th>
+          <th>状態</th>
+          <th>DR氏名</th>
+          <th></th>
+          <th>フリガナ</th>
+          <th>施設名</th>
+          <th>備考</th>
+          <th>ご来場時間</th>
+          <th>ご退場時間</th>
+          <th>地域区分</th>
+        </tr>
       `;
       table.appendChild(thead);
 
