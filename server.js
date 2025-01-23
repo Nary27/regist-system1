@@ -1,5 +1,5 @@
 /*************************************
- * server.js (Heroku-ready)
+ * server.js (Heroku-ready, Polling Example)
  *************************************/
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -9,10 +9,10 @@ const http = require("http");
 const { google } = require("googleapis");
 const WebSocket = require("ws");
 
-// ★ Heroku環境では process.env.PORT を使用
+// 1) HerokuのPORT or ローカル3000
 const PORT = process.env.PORT || 3000;
 
-// ★ スプレッドシートID と API_KEY
+// 2) スプレッドシート設定
 const SPREADSHEET_ID = "1hMKTxFPIliPWGDt4auIbRq8wGJYCu_-0DKXujqvV4gw";
 const API_KEY = "AIzaSyCJMJHHiar0P2e6jdWm0HJdGldAaE3b05I";
 
@@ -29,11 +29,10 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// 静的ファイル (index.html等) → buildパック or ルート直下
-// ここでは "public" フォルダを使う想定
+// 3) 静的ファイル (index.htmlなど)
 app.use(express.static(path.join(__dirname, "public")));
 
-/** Google Sheets関連関数 **/
+// Google Sheets 関数
 async function getSpreadsheetInfo() {
   const sheets = google.sheets({ version: "v4" });
   try {
@@ -56,7 +55,6 @@ async function getMultipleSheetsData(sheetNames) {
   if (!sheetNames || sheetNames.length === 0) return {};
   const sheets = google.sheets({ version: "v4" });
   const ranges = sheetNames.map(name => `${name}!B2:O`);
-
   try {
     const resp = await sheets.spreadsheets.values.batchGet({
       spreadsheetId: SPREADSHEET_ID,
@@ -70,24 +68,25 @@ async function getMultipleSheetsData(sheetNames) {
       const [rawSheetName] = vr.range.split("!");
       const sheetName = rawSheetName.replace(/^'/, "").replace(/'$/, "");
       const rawData = vr.values || [];
-
+      // 先頭行はヘッダ => slice(1)
       let parsed = rawData.slice(1).map(row => {
-        const no = row[0] || "";
-        const rawArr  = (row[1] || "").toUpperCase();
-        const rawDep  = (row[2] || "").toUpperCase();
-        const drName  = row[3] || "";
-        const gBlank  = row[4] || "";
-        const furigana= row[5] || "";
-        const facility= row[6] || "";
-        const remarks = row[7] || "";
-        const arrTime = row[9] || "";
-        const depTime = row[10]|| "";
-        const region  = row[11]|| "";
-        const rawCancel= (row[12]||"").toUpperCase();
+        // B=0, C=1, D=2, E=3 ... N=12
+        const no        = row[0] || "";
+        const rawArr    = (row[1]||"").toUpperCase();
+        const rawDep    = (row[2]||"").toUpperCase();
+        const drName    = row[3] || "";
+        const gBlank    = row[4] || "";
+        const furigana  = row[5] || "";
+        const facility  = row[6] || "";
+        const remarks   = row[7] || "";
+        const arrTime   = row[9] || "";
+        const depTime   = row[10]|| "";
+        const region    = row[11]|| "";
+        const rawCancel = (row[12]||"").toUpperCase();
         return {
           no,
-          arrival    : rawArr==="TRUE"?"true":"false",
-          departure  : rawDep==="TRUE"?"true":"false",
+          arrival    : (rawArr==="TRUE")?"true":"false",
+          departure  : (rawDep==="TRUE")?"true":"false",
           drName,
           gBlank,
           furigana,
@@ -96,7 +95,7 @@ async function getMultipleSheetsData(sheetNames) {
           arrivalTime: arrTime,
           departureTime: depTime,
           region,
-          canceledByO: rawCancel==="TRUE"
+          canceledByO: (rawCancel==="TRUE")
         };
       });
       result[sheetName] = parsed;
@@ -118,6 +117,7 @@ async function getSummaryData() {
       key: API_KEY
     });
     let tableData = resp.data.values || [];
+    // 空セル除外
     tableData = tableData
       .map(rowArr => rowArr.filter(cell => cell && cell.trim()))
       .filter(r => r.length>0);
@@ -128,7 +128,7 @@ async function getSummaryData() {
   }
 }
 
-/** エンドポイント **/
+// ルート
 app.get("/info", async (req, res) => {
   console.log("[GET /info]");
   const info = await getSpreadsheetInfo();
@@ -153,31 +153,23 @@ app.get("/summary-data", async (req, res) => {
     const table = await getSummaryData();
     res.json(table);
   } catch (err) {
-    console.error("[GET /summary-data] error:", err.message);
+    console.error("[getSummaryData] error:", err.message);
     res.status(500).send("Error fetching summary data");
   }
 });
 
-/** Webhook **/
+/** 
+ * Webhook不要の場合、コメントアウト or 削除
+ * 
 app.post("/api/sheetUpdate", (req, res) => {
-  console.log("[POST /api/sheetUpdate] body=", req.body);
-  wss.clients.forEach(client => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify({
-        type: "sheetUpdated",
-        sheetName: req.body.sheetName,
-        range: req.body.range,
-        newValue: req.body.newValue
-      }));
-    }
-  });
-  res.status(200).json({ status: "ok" });
+  ...
 });
+*/
 
-/** WebSocket & HTTP **/
+// HTTP + WebSocket (オプション)
 const httpServer = http.createServer(app);
 const wss = new WebSocket.Server({ server: httpServer });
 
 httpServer.listen(PORT, () => {
-  console.log(`Server & WS running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
