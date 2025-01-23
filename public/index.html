@@ -2,96 +2,66 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>受付確認システム</title>
+  <title>受付確認システム(テーブル左右寄せ+同サイズ)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      margin:0; padding:0;
-      font-family:Arial, sans-serif;
-      background:#fafafa; color:#333;
-      user-select:none;
+      margin:0; padding:0; font-family:Arial, sans-serif;
+      background:#fafafa; color:#333; user-select:none;
     }
-    h1 {
-      margin:1rem 0; text-align:center;
-    }
+    h1 { margin:1rem 0; text-align:center; }
     .main-buttons {
-      display:flex; gap:0.5rem;
-      justify-content:center; margin-bottom:0.5rem;
-      flex-wrap:wrap;
+      display:flex; gap:0.5rem; justify-content:center;
+      margin-bottom:0.5rem; flex-wrap:wrap;
     }
     .main-button {
-      padding:0.8rem 1.2rem;
-      background:#ddd;
-      border:2px solid #666;
-      border-radius:5px;
-      cursor:pointer;
-      font-weight:bold;
+      padding:0.8rem 1.2rem; background:#ddd;
+      border:2px solid #666; border-radius:5px;
+      cursor:pointer; font-weight:bold;
     }
     .main-button.active {
-      background:peachpuff;
-      border-color:#333;
+      background:peachpuff; border-color:#333;
     }
     .sub-buttons {
       display:flex; gap:0.5rem; flex-wrap:wrap;
       justify-content:center; margin-bottom:1rem;
     }
     .sub-button {
-      padding:0.5rem 1rem;
-      background:#eee;
-      border:2px solid #666;
-      border-radius:5px;
-      cursor:pointer;
-      font-size:0.9rem;
+      padding:0.5rem 1rem; background:#eee;
+      border:2px solid #666; border-radius:5px;
+      cursor:pointer; font-size:0.9rem;
     }
     .sub-button.active {
-      background:#ffc;
-      border-color:#333;
+      background:#ffc; border-color:#333;
     }
     #subSelect {
-      display:none; margin:0 auto;
-      margin-bottom:1rem; max-width:300px;
-      font-size:1rem;
+      display:none; margin:0 auto; margin-bottom:1rem;
+      max-width:300px; font-size:1rem;
     }
     .table-container {
       width:95%; margin:0 auto; overflow-x:auto;
     }
     table {
-      width:100%; min-width:1500px;
-      border-collapse:collapse; margin-top:0.5rem;
+      width:100%; min-width:1500px; border-collapse:collapse;
+      margin-top:0.5rem;
     }
     th, td {
-      border:1px solid #ddd;
-      padding:0.8rem;
-      text-align:center;
+      border:1px solid #ddd; padding:0.8rem; text-align:center;
     }
-    .status-coming {
-      background-color:#F0f080; color:#000;
-    }
-    .status-leaving {
-      background-color:#0073a8; color:#000;
-    }
-    .status-not-arrived {
-      background-color:#fff; color:#000;
-    }
-    .status-cancelled {
-      background-color:gray; color:#fff;
-    }
+    .status-coming    { background-color:#F0f080; color:#000; }
+    .status-leaving   { background-color:#0073a8; color:#000; }
+    .status-not-arrived { background-color:#fff;   color:#000; }
+    .status-cancelled { background-color:gray;   color:#fff; }
     @media (max-width:600px) {
-      table {
-        min-width:600px;
-      }
-      th, td {
-        font-size:0.5rem; padding:0.3rem;
-      }
+      table { min-width:600px; }
+      th, td { font-size:0.5rem; padding:0.3rem; }
     }
     .summary-table {
-      border-collapse:collapse;
-      margin-top:1rem;
+      border-collapse:collapse; margin-top:1rem;
       min-width:300px; max-width:620px;
     }
     .summary-table th, .summary-table td {
-      border:1px solid #aaa;
-      padding:0.5rem; text-align:center;
+      border:1px solid #aaa; padding:0.5rem; text-align:center;
     }
   </style>
 </head>
@@ -105,7 +75,7 @@
     <div class="main-button" data-mode="npkk">NPKK</div>
     <div class="main-button" data-mode="os">OS</div>
   </div>
-  
+
   <div class="sub-buttons" id="sub-buttons"></div>
   <select id="subSelect"></select>
 
@@ -120,16 +90,13 @@
     let currentSubSheet = "";
 
     window.addEventListener("DOMContentLoaded", async () => {
-      // 1) /info
       const infoRes = await fetch("/info");
       const info = await infoRes.json();
-      document.getElementById("page-title").textContent = info.title||"スプレッドシート";
-      allSheetNames = info.sheetNames||[];
+      document.getElementById("page-title").textContent = info.title || "スプレッドシート";
+      allSheetNames = info.sheetNames || [];
 
-      // 2) batch-data
       await fetchAllData();
 
-      // localStorage
       const savedMainMode = localStorage.getItem("activeMainMode");
       const savedSubSheet = localStorage.getItem("activeSubSheet");
 
@@ -149,13 +116,12 @@
         }
       }
 
-      // 10秒おきポーリング
-      setInterval(async()=>{
-        console.log("[polling] start");
+      // 10秒ポーリング
+      setInterval(async () => {
         await fetchAllData();
-        if(currentMainMode==="menu"){
+        if (currentMainMode==="menu") {
           await showSummaryTable();
-        } else if(currentSubSheet){
+        } else if (currentSubSheet) {
           renderTable(currentSubSheet);
         }
       }, 10000);
@@ -168,10 +134,10 @@
         return;
       }
       allData = await res.json();
-      console.log("[fetchAllData] allData=", allData);
+      console.log("[fetchAllData]", allData);
     }
 
-    // ★ 来場数内訳テーブル: 1列目右寄せ, 2列目左寄せ
+    // ★ 来場数内訳: 1列目=右寄せ, 2列目=左寄せ, 全セル=同サイズ, 総来場行=背景薄灰 + 太字
     async function showSummaryTable() {
       const summaryArea = document.getElementById("summary-table-area");
       summaryArea.innerHTML = "";
@@ -181,48 +147,49 @@
         summaryArea.innerHTML="<p>来場数内訳取得エラー</p>";
         return;
       }
-      const tableData=await res.json();
+      const tableData = await res.json();
       if(tableData.length===0){
         summaryArea.innerHTML="<p>来場数内訳がありません</p>";
         return;
       }
 
-      let html=`<table class="summary-table"><tbody>`;
-      tableData.forEach(row=>{
-        html+="<tr>";
+      let html = `<table class="summary-table"><tbody>`;
 
-        // 特別扱い: "総来場者数(新規含む)" && row.length>=2
-        if(row[0]==="総来場者数(新規含む)" && row.length>=2){
-          // 1列目 => 右寄せ, 大文字
-          html += `<td style="font-size:1.2rem; font-weight:bold; text-align:right;">${row[0]}</td>`;
-          // 2列目 => 左寄せ, 大文字
-          html += `<td style="font-size:1.2rem; font-weight:bold; text-align:left;">${row[1]}</td>`;
-          // 3列目以降(あれば)
-          for(let c=2; c<row.length; c++){
-            html += `<td>${row[c]}</td>`;
-          }
-        } else {
-          // 通常行 => 1列目=右寄せ, 2列目=左寄せ
-          if(row.length>0){
-            html += `<td style="text-align:right;">${row[0]}</td>`;
-          }
-          if(row.length>1){
-            html += `<td style="text-align:left;">${row[1]}</td>`;
-          }
-          // 3列目以降
-          for(let c=2; c<row.length; c++){
-            html += `<td>${row[c]}</td>`;
-          }
+      tableData.forEach(row => {
+        // 総来場者数(新規含む)か
+        const isSpecial = (row[0]==="総来場者数(新規含む)");
+
+        // 行のstyle
+        let rowStyle = "";
+        if (isSpecial) {
+          // 背景を薄いグレー + 太字
+          rowStyle = ` style="background-color:#eee; font-weight:bold;"`;
         }
 
-        html+="</tr>";
+        html += `<tr${rowStyle}>`;
+
+        // 1列目 → 右寄せ, フォント=1.2rem
+        if (row.length>0) {
+          html += `<td style="font-size:1.2rem; text-align:right;">${row[0]}</td>`;
+        }
+        // 2列目 → 左寄せ, フォント=1.2rem
+        if (row.length>1) {
+          html += `<td style="font-size:1.2rem; text-align:left;">${row[1]}</td>`;
+        }
+        // 3列目以降 → 通常中央寄せで良ければ:
+        for (let c=2; c<row.length; c++) {
+          html += `<td style="font-size:1.2rem;">${row[c]}</td>`;
+        }
+
+        html += `</tr>`;
       });
-      html+="</tbody></table>";
-      summaryArea.innerHTML=html;
+
+      html += "</tbody></table>";
+      summaryArea.innerHTML = html;
     }
 
-    document.getElementById("main-buttons").addEventListener("click", async(e)=>{
-      const btn=e.target.closest(".main-button");
+    document.getElementById("main-buttons").addEventListener("click", async (e) => {
+      const btn = e.target.closest(".main-button");
       if(!btn)return;
       const mode=btn.dataset.mode;
       setMainMode(mode);
@@ -236,7 +203,7 @@
       }
     });
 
-    function setMainMode(mode){
+    function setMainMode(mode) {
       currentMainMode=mode;
       localStorage.setItem("activeMainMode", mode);
       currentSubSheet="";
@@ -308,10 +275,9 @@
     function handleSubButtonClick(sheetName, store=true){
       highlightActiveSubButton(sheetName);
       currentSubSheet=sheetName;
-      if(store) localStorage.setItem("activeSubSheet", sheetName);
+      if(store) localStorage.setItem("activeSubSheet",sheetName);
       renderTable(sheetName);
     }
-
     function highlightActiveSubButton(sheetName){
       document.querySelectorAll(".sub-button").forEach(btn=>{
         btn.classList.remove("active");
