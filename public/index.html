@@ -5,29 +5,93 @@
   <title>受付確認システム</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { margin:0; padding:0; font-family:Arial, sans-serif; background:#fafafa; color:#333; user-select:none;}
-    h1 { margin:1rem 0; text-align:center;}
-    .main-buttons { display:flex; gap:0.5rem; justify-content:center; margin-bottom:0.5rem; flex-wrap:wrap;}
-    .main-button { padding:0.8rem 1.2rem; background:#ddd; border:2px solid #666; border-radius:5px; cursor:pointer; font-weight:bold;}
-    .main-button.active { background:peachpuff; border-color:#333;}
-    .sub-buttons { display:flex; gap:0.5rem; flex-wrap:wrap; justify-content:center; margin-bottom:1rem;}
-    .sub-button { padding:0.5rem 1rem; background:#eee; border:2px solid #666; border-radius:5px; cursor:pointer; font-size:0.9rem;}
-    .sub-button.active { background:#ffc; border-color:#333;}
-    #subSelect { display:none; margin:0 auto; margin-bottom:1rem; max-width:300px; font-size:1rem;}
-    .table-container { width:95%; margin:0 auto; overflow-x:auto;}
-    table { width:100%; min-width:1500px; border-collapse:collapse; margin-top:0.5rem;}
-    th, td { border:1px solid #ddd; padding:0.8rem; text-align:center;}
-    .status-coming { background-color:#F0f080; color:#000;}
-    .status-leaving { background-color:#0073a8; color:#000;}
-    .status-not-arrived { background-color:#fff; color:#000;}
-    .status-cancelled { background-color:gray; color:#fff;}
-    @media (max-width:600px) {
-      table { min-width:600px;}
-      th, td { font-size:0.5rem; padding:0.3rem;}
+    body {
+      margin:0; padding:0;
+      font-family:Arial, sans-serif;
+      background:#fafafa; color:#333;
+      user-select:none;
     }
-    .summary-table { border-collapse:collapse; margin-top:1rem; min-width:300px; max-width:620px;}
+    h1 {
+      margin:1rem 0; text-align:center;
+    }
+    .main-buttons {
+      display:flex; gap:0.5rem;
+      justify-content:center; margin-bottom:0.5rem;
+      flex-wrap:wrap;
+    }
+    .main-button {
+      padding:0.8rem 1.2rem;
+      background:#ddd;
+      border:2px solid #666;
+      border-radius:5px;
+      cursor:pointer;
+      font-weight:bold;
+    }
+    .main-button.active {
+      background:peachpuff;
+      border-color:#333;
+    }
+    .sub-buttons {
+      display:flex; gap:0.5rem; flex-wrap:wrap;
+      justify-content:center; margin-bottom:1rem;
+    }
+    .sub-button {
+      padding:0.5rem 1rem;
+      background:#eee;
+      border:2px solid #666;
+      border-radius:5px;
+      cursor:pointer;
+      font-size:0.9rem;
+    }
+    .sub-button.active {
+      background:#ffc;
+      border-color:#333;
+    }
+    #subSelect {
+      display:none; margin:0 auto;
+      margin-bottom:1rem; max-width:300px;
+      font-size:1rem;
+    }
+    .table-container {
+      width:95%; margin:0 auto; overflow-x:auto;
+    }
+    table {
+      width:100%; min-width:1500px;
+      border-collapse:collapse; margin-top:0.5rem;
+    }
+    th, td {
+      border:1px solid #ddd;
+      padding:0.8rem;
+      text-align:center;
+    }
+    .status-coming {
+      background-color:#F0f080; color:#000;
+    }
+    .status-leaving {
+      background-color:#0073a8; color:#000;
+    }
+    .status-not-arrived {
+      background-color:#fff; color:#000;
+    }
+    .status-cancelled {
+      background-color:gray; color:#fff;
+    }
+    @media (max-width:600px) {
+      table {
+        min-width:600px;
+      }
+      th, td {
+        font-size:0.5rem; padding:0.3rem;
+      }
+    }
+    .summary-table {
+      border-collapse:collapse;
+      margin-top:1rem;
+      min-width:300px; max-width:620px;
+    }
     .summary-table th, .summary-table td {
-      border:1px solid #aaa; padding:0.5rem; text-align:center;
+      border:1px solid #aaa;
+      padding:0.5rem; text-align:center;
     }
   </style>
 </head>
@@ -49,24 +113,27 @@
   <div id="summary-table-area" style="width:95%; margin:0 auto;"></div>
 
   <script>
-    let allSheetNames=[];
-    let allData={};
+    let allSheetNames = [];
+    let allData = {};
 
-    let currentMainMode="menu";
-    let currentSubSheet="";
+    let currentMainMode = "menu";
+    let currentSubSheet = "";
 
-    window.addEventListener("DOMContentLoaded", async()=>{
-      const infoRes=await fetch("/info");
-      const info=await infoRes.json();
+    window.addEventListener("DOMContentLoaded", async () => {
+      // 1) /info
+      const infoRes = await fetch("/info");
+      const info = await infoRes.json();
       document.getElementById("page-title").textContent = info.title||"スプレッドシート";
-      allSheetNames=info.sheetNames||[];
+      allSheetNames = info.sheetNames||[];
 
+      // 2) batch-data
       await fetchAllData();
 
-      const savedMainMode=localStorage.getItem("activeMainMode");
-      const savedSubSheet=localStorage.getItem("activeSubSheet");
+      // localStorage
+      const savedMainMode = localStorage.getItem("activeMainMode");
+      const savedSubSheet = localStorage.getItem("activeSubSheet");
 
-      if(savedMainMode && allSheetNames){
+      if (savedMainMode && allSheetNames) {
         setMainMode(savedMainMode);
       } else {
         setMainMode("menu");
@@ -74,10 +141,10 @@
       highlightActiveMainButton(currentMainMode);
       renderSubButtons(currentMainMode);
 
-      if(savedSubSheet && allSheetNames.includes(savedSubSheet)){
-        handleSubButtonClick(savedSubSheet,false);
+      if (savedSubSheet && allSheetNames.includes(savedSubSheet)) {
+        handleSubButtonClick(savedSubSheet, false);
       } else {
-        if(currentMainMode==="menu"){
+        if (currentMainMode==="menu") {
           await showSummaryTable();
         }
       }
@@ -91,24 +158,25 @@
         } else if(currentSubSheet){
           renderTable(currentSubSheet);
         }
-      },10000);
+      }, 10000);
     });
 
-    async function fetchAllData(){
-      const res=await fetch("/batch-data");
-      if(!res.ok){
-        console.error("[fetchAllData] error",res.status);
+    async function fetchAllData() {
+      const res = await fetch("/batch-data");
+      if (!res.ok) {
+        console.error("[fetchAllData] error", res.status);
         return;
       }
-      allData=await res.json();
-      console.log("[fetchAllData] allData=",allData);
+      allData = await res.json();
+      console.log("[fetchAllData] allData=", allData);
     }
 
-    async function showSummaryTable(){
-      const summaryArea=document.getElementById("summary-table-area");
-      summaryArea.innerHTML="";
+    // ★ 来場数内訳テーブル: 1列目右寄せ, 2列目左寄せ
+    async function showSummaryTable() {
+      const summaryArea = document.getElementById("summary-table-area");
+      summaryArea.innerHTML = "";
 
-      const res=await fetch("/summary-data");
+      const res = await fetch("/summary-data");
       if(!res.ok){
         summaryArea.innerHTML="<p>来場数内訳取得エラー</p>";
         return;
@@ -119,52 +187,38 @@
         return;
       }
 
-      // ★ ここで「テキスト左寄せ+テーブル右寄せ」の2カラムレイアウトにする
-      // textHtml と tableHtml を2カラムで表示
-      let textHtml=`
-        <div style="width:45%; text-align:left;">
-          <p>来場者数内訳の説明テキストなどを置けます<br/>
-          <strong>左側で左寄せ</strong>
-          </p>
-        </div>
-      `;
-
-      // tableHtml => 従来通り
-      let tableHtml=``; 
-      tableHtml+=`<table class="summary-table"><tbody>`;
+      let html=`<table class="summary-table"><tbody>`;
       tableData.forEach(row=>{
-        tableHtml+=`<tr>`;
+        html+="<tr>";
+
+        // 特別扱い: "総来場者数(新規含む)" && row.length>=2
         if(row[0]==="総来場者数(新規含む)" && row.length>=2){
-          tableHtml+=`<td style="font-size:1.2rem; font-weight:bold;">${row[0]}</td>`;
-          tableHtml+=`<td style="font-size:1.2rem; font-weight:bold;">${row[1]}</td>`;
-          for(let c=2;c<row.length;c++){
-            tableHtml+=`<td>${row[c]}</td>`;
+          // 1列目 => 右寄せ, 大文字
+          html += `<td style="font-size:1.2rem; font-weight:bold; text-align:right;">${row[0]}</td>`;
+          // 2列目 => 左寄せ, 大文字
+          html += `<td style="font-size:1.2rem; font-weight:bold; text-align:left;">${row[1]}</td>`;
+          // 3列目以降(あれば)
+          for(let c=2; c<row.length; c++){
+            html += `<td>${row[c]}</td>`;
           }
         } else {
-          row.forEach(cell=>{
-            tableHtml+=`<td>${cell}</td>`;
-          });
+          // 通常行 => 1列目=右寄せ, 2列目=左寄せ
+          if(row.length>0){
+            html += `<td style="text-align:right;">${row[0]}</td>`;
+          }
+          if(row.length>1){
+            html += `<td style="text-align:left;">${row[1]}</td>`;
+          }
+          // 3列目以降
+          for(let c=2; c<row.length; c++){
+            html += `<td>${row[c]}</td>`;
+          }
         }
-        tableHtml+=`</tr>`;
+
+        html+="</tr>";
       });
-      tableHtml+=`</tbody></table>`;
-
-      // テーブルを右寄せ
-      tableHtml=`<div style="width:50%; text-align:right;">${tableHtml}</div>`;
-
-      // 全体をflexで左右に配置
-      const finalHtml=`
-        <div style="
-          display:flex;
-          justify-content:space-between;
-          align-items:flex-start;
-          gap:1rem;">
-          ${textHtml}
-          ${tableHtml}
-        </div>
-      `;
-      
-      summaryArea.innerHTML=finalHtml;
+      html+="</tbody></table>";
+      summaryArea.innerHTML=html;
     }
 
     document.getElementById("main-buttons").addEventListener("click", async(e)=>{
@@ -184,11 +238,12 @@
 
     function setMainMode(mode){
       currentMainMode=mode;
-      localStorage.setItem("activeMainMode",mode);
+      localStorage.setItem("activeMainMode", mode);
       currentSubSheet="";
       localStorage.removeItem("activeSubSheet");
       document.getElementById("table-container").innerHTML="";
     }
+
     function highlightActiveMainButton(mode){
       document.querySelectorAll(".main-button").forEach(mBtn=>{
         mBtn.classList.remove("active");
@@ -197,6 +252,7 @@
         }
       });
     }
+
     function renderSubButtons(mode){
       const subContainer=document.getElementById("sub-buttons");
       const subSelect=document.getElementById("subSelect");
@@ -231,8 +287,8 @@
           opt.textContent=sheetName;
           subSelect.appendChild(opt);
         });
-        subSelect.onchange=(e)=>{
-          const val=e.target.value;
+        subSelect.onchange=(ev)=>{
+          const val=ev.target.value;
           if(!val)return;
           handleSubButtonClick(val);
         };
@@ -252,9 +308,10 @@
     function handleSubButtonClick(sheetName, store=true){
       highlightActiveSubButton(sheetName);
       currentSubSheet=sheetName;
-      if(store) localStorage.setItem("activeSubSheet",sheetName);
+      if(store) localStorage.setItem("activeSubSheet", sheetName);
       renderTable(sheetName);
     }
+
     function highlightActiveSubButton(sheetName){
       document.querySelectorAll(".sub-button").forEach(btn=>{
         btn.classList.remove("active");
@@ -263,6 +320,7 @@
         }
       });
     }
+
     function renderTable(sheetName){
       const container=document.getElementById("table-container");
       container.innerHTML="";
