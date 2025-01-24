@@ -29,23 +29,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// Basic認証（サンプル）
-function basicAuth(req, res, next) {
-    const authHeader = req.headers['authorization'];
-    if (!authHeader) {
-        res.setHeader('WWW-Authenticate', 'Basic realm="Restricted Area"');
-        return res.status(401).send('Authentication required');
-    }
-    const credentials = Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
-    const [username, password] = credentials;
-    if (username === 'kst' && password === 'hirakegoma2020') {
-        next();
-    } else {
-        res.setHeader('WWW-Authenticate', 'Basic realm="Restricted Area"');
-        return res.status(401).send('Invalid credentials');
-    }
-}
-app.use(basicAuth);
+
 
 // 3) 静的ファイル (index.htmlなど)
 app.use(express.static(path.join(__dirname, "public")));
