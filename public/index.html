@@ -6,8 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      margin:0; padding:0; font-family:Arial, sans-serif;
-      background:#fafafa; color:#333; user-select:none;
+      margin:0; padding:0;
+      font-family:Arial, sans-serif;
+      background:#fafafa; color:#333;
+      user-select:none;
     }
     h1 { margin:1rem 0; text-align:center; }
     .main-buttons {
@@ -48,16 +50,20 @@
     th, td {
       border:1px solid #ddd; padding:0.8rem; text-align:center;
     }
+    /* 行のステータス別色 */
     .status-coming    { background-color:#F0f080; color:#000; }
     .status-leaving   { background-color:#0073a8; color:#000; }
     .status-not-arrived { background-color:#fff;   color:#000; }
     .status-cancelled { background-color:gray;   color:#fff; }
+
     @media (max-width:600px) {
       table { min-width:600px; }
       th, td { font-size:0.5rem; padding:0.3rem; }
     }
+
+    /* 来場数内訳テーブル */
     .summary-table {
-      border-collapse:collapse;     margin: 1rem auto 0;
+      border-collapse:collapse; margin:1rem auto 0;
       min-width:300px; max-width:620px;
     }
     .summary-table th, .summary-table td {
@@ -81,7 +87,7 @@
 
   <div class="table-container" id="table-container"></div>
   <div id="summary-table-area" style="width:95%; margin:0 auto;"></div>
-
+  
   <script>
     let allSheetNames = [];
     let allData = {};
@@ -90,13 +96,16 @@
     let currentSubSheet = "";
 
     window.addEventListener("DOMContentLoaded", async () => {
+      // 1) シート情報を取得
       const infoRes = await fetch("/info");
       const info = await infoRes.json();
       document.getElementById("page-title").textContent = info.title || "スプレッドシート";
       allSheetNames = info.sheetNames || [];
 
+      // 初回データ取得
       await fetchAllData();
 
+      // タブ保持
       const savedMainMode = localStorage.getItem("activeMainMode");
       const savedSubSheet = localStorage.getItem("activeSubSheet");
 
@@ -111,12 +120,13 @@
       if (savedSubSheet && allSheetNames.includes(savedSubSheet)) {
         handleSubButtonClick(savedSubSheet, false);
       } else {
+        // 初期状態がmenuなら来場数内訳を表示
         if (currentMainMode==="menu") {
           await showSummaryTable();
         }
       }
 
-      // 10秒ポーリング
+      // ★ 20秒ごとにポーリング
       setInterval(async () => {
         await fetchAllData();
         if (currentMainMode==="menu") {
@@ -124,9 +134,10 @@
         } else if (currentSubSheet) {
           renderTable(currentSubSheet);
         }
-      }, 10000);
+      }, 20000); // ← 20000ミリ秒=20秒
     });
 
+    // batch-data取得
     async function fetchAllData() {
       const res = await fetch("/batch-data");
       if (!res.ok) {
@@ -137,18 +148,18 @@
       console.log("[fetchAllData]", allData);
     }
 
-    // ★ 来場数内訳: 1列目=右寄せ, 2列目=左寄せ, 全セル=同サイズ, 総来場行=背景薄灰 + 太字
+    // 来場数内訳テーブル表示
     async function showSummaryTable() {
       const summaryArea = document.getElementById("summary-table-area");
       summaryArea.innerHTML = "";
 
       const res = await fetch("/summary-data");
-      if(!res.ok){
-        summaryArea.innerHTML="<p>来場数内訳取得エラー</p>";
+      if (!res.ok) {
+        summaryArea.innerHTML = "<p>来場数内訳取得エラー</p>";
         return;
       }
       const tableData = await res.json();
-      if(tableData.length===0){
+      if (tableData.length===0) {
         summaryArea.innerHTML="<p>来場数内訳がありません</p>";
         return;
       }
@@ -156,47 +167,46 @@
       let html = `<table class="summary-table"><tbody>`;
 
       tableData.forEach(row => {
-        // 総来場者数(新規含む)か
-        const isSpecial = (row[0]==="総来場者数(新規含む)");
-
-        // 行のstyle
+        // 特別行か判定
+        const isSpecial = (row[0] === "総来場者数(新規含む)");
         let rowStyle = "";
         if (isSpecial) {
-          // 背景を薄いグレー + 太字
+          // 背景薄グレー + 太字
           rowStyle = ` style="background-color:#eee; font-weight:bold;"`;
         }
 
         html += `<tr${rowStyle}>`;
 
-        // 1列目 → 右寄せ, フォント=1.2rem
+        // 1列目 => 右寄せ, 1.2rem
         if (row.length>0) {
           html += `<td style="font-size:1.2rem; text-align:right;">${row[0]}</td>`;
         }
-        // 2列目 → 左寄せ, フォント=1.2rem
+        // 2列目 => 左寄せ, 1.2rem
         if (row.length>1) {
           html += `<td style="font-size:1.2rem; text-align:left;">${row[1]}</td>`;
         }
-        // 3列目以降 → 通常中央寄せで良ければ:
+        // 3列目以降 => 中央寄せ, 1.2rem
         for (let c=2; c<row.length; c++) {
           html += `<td style="font-size:1.2rem;">${row[c]}</td>`;
         }
-
-        html += `</tr>`;
+        html += "</tr>";
       });
 
       html += "</tbody></table>";
       summaryArea.innerHTML = html;
     }
 
+    // メインボタン押下
     document.getElementById("main-buttons").addEventListener("click", async (e) => {
       const btn = e.target.closest(".main-button");
-      if(!btn)return;
+      if (!btn) return;
+
       const mode=btn.dataset.mode;
       setMainMode(mode);
       highlightActiveMainButton(mode);
       renderSubButtons(mode);
 
-      if(mode==="menu"){
+      if (mode==="menu") {
         await showSummaryTable();
       } else {
         document.getElementById("summary-table-area").innerHTML="";
@@ -211,15 +221,16 @@
       document.getElementById("table-container").innerHTML="";
     }
 
-    function highlightActiveMainButton(mode){
+    function highlightActiveMainButton(mode) {
       document.querySelectorAll(".main-button").forEach(mBtn=>{
         mBtn.classList.remove("active");
-        if(mBtn.dataset.mode===mode){
+        if (mBtn.dataset.mode===mode){
           mBtn.classList.add("active");
         }
       });
     }
 
+    // サブボタン or プルダウン生成
     function renderSubButtons(mode){
       const subContainer=document.getElementById("sub-buttons");
       const subSelect=document.getElementById("subSelect");
@@ -240,7 +251,7 @@
       }
 
       const isMobile=(window.innerWidth<=600);
-      if(mode==="menu"&&isMobile){
+      if(mode==="menu" && isMobile){
         subContainer.style.display="none";
         subSelect.style.display="inline-block";
         const placeholderOpt=document.createElement("option");
@@ -287,6 +298,7 @@
       });
     }
 
+    // シートテーブル描画
     function renderTable(sheetName){
       const container=document.getElementById("table-container");
       container.innerHTML="";
