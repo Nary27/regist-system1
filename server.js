@@ -1,5 +1,5 @@
 /*************************************
- * server.js (Heroku-ready, Polling Example)
+ * server.js (Heroku-ready, Polling Example + BasicAuth)
  *************************************/
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -22,6 +22,8 @@ const EXCLUDED_SHEETS = [
   "営業所分類",
   "来場数内訳",
   "リーダー",
+  "NPKK営業所分類",
+  "来場数内訳_NPKK",
   "履歴"
 ];
 
@@ -29,12 +31,34 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+/** ★ Basic認証 (ID=0126, PW=0126) を全エンドポイントに適用 */
+function basicAuth(req, res, next) {
+  const authHeader = req.headers["authorization"];
+  if (!authHeader) {
+    res.setHeader("WWW-Authenticate", 'Basic realm="Restricted"');
+    return res.status(401).send("Authentication required");
+  }
+  // Basic 認証のフォーマット: "Basic base64(<user>:<pass>)"
+  const base64Credentials = authHeader.split(" ")[1];
+  const decoded = Buffer.from(base64Credentials, "base64").toString();
+  const [user, pass] = decoded.split(":");
 
+  if (user === "0126" && pass === "0126") {
+    next(); // 認証OK
+  } else {
+    res.setHeader("WWW-Authenticate", 'Basic realm="Restricted"');
+    return res.status(401).send("Invalid credentials");
+  }
+}
+app.use(basicAuth);
 
-// 3) 静的ファイル (index.htmlなど)
+/** 
+ * 3) 静的ファイル (index.htmlなど)
+ *    Basic認証が通った後に配信される
+ */
 app.use(express.static(path.join(__dirname, "public")));
 
-// Google Sheets 関数
+// 4) Google Sheets 関数
 async function getSpreadsheetInfo() {
   const sheets = google.sheets({ version: "v4" });
   try {
@@ -70,7 +94,6 @@ async function getMultipleSheetsData(sheetNames) {
       const [rawSheetName] = vr.range.split("!");
       const sheetName = rawSheetName.replace(/^'/, "").replace(/'$/, "");
       const rawData = vr.values || [];
-      // 先頭行はヘッダ => slice(1)
       let parsed = rawData.slice(1).map(row => {
         // B=0, C=1, D=2, E=3 ... N=12
         const no        = row[0] || "";
@@ -119,7 +142,6 @@ async function getSummaryData() {
       key: API_KEY
     });
     let tableData = resp.data.values || [];
-    // 空セル除外
     tableData = tableData
       .map(rowArr => rowArr.filter(cell => cell && cell.trim()))
       .filter(r => r.length>0);
@@ -130,7 +152,7 @@ async function getSummaryData() {
   }
 }
 
-// ルート
+// 5) ルート
 app.get("/info", async (req, res) => {
   console.log("[GET /info]");
   const info = await getSpreadsheetInfo();
@@ -168,7 +190,6 @@ app.post("/api/sheetUpdate", (req, res) => {
 });
 */
 
-// HTTP + WebSocket (オプション)
 const httpServer = http.createServer(app);
 const wss = new WebSocket.Server({ server: httpServer });
 
