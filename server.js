@@ -44,7 +44,7 @@ function basicAuth(req, res, next) {
   const decoded = Buffer.from(base64Credentials, "base64").toString();
   const [user, pass] = decoded.split(":");
 
-  if (user === "0126" && pass === "0126") {
+  if (user === "test" && pass === "1771") {
     next(); // 認証OK
   } else {
     res.setHeader("WWW-Authenticate", 'Basic realm="Restricted"');
