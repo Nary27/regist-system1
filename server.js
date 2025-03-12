@@ -97,31 +97,34 @@ async function getMultipleSheetsData(sheetNames) {
       const rawData = vr.values || [];
       let parsed = rawData.slice(1).map(row => {
         // B=0, C=1, D=2, E=3 ... N=12
-        const no        = row[0] || "";
-        const rawArr    = (row[1]||"").toUpperCase();
-        const rawDep    = (row[2]||"").toUpperCase();
-        const drName    = row[3] || "";
-        const gBlank    = row[4] || "";
-        const furigana  = row[5] || "";
-        const facility  = row[6] || "";
-        const remarks   = row[7] || "";
-        const arrTime   = row[9] || "";
-        const depTime   = row[10]|| "";
-        const region    = row[11]|| "";
-        const rawCancel = (row[12]||"").toUpperCase();
+        const no          = row[0]||"";
+        const rawArr      = (row[1]||"").toUpperCase();
+        const rawDep      = (row[2]||"").toUpperCase();
+        const drName      = row[3]||"";
+        const honorific   = row[4]||"";  // 敬称
+        const furigana    = row[5]||"";
+        const facility    = row[6]||"";
+        const remarks     = row[7]||"";
+        const arrTime     = row[9]||"";
+        const depTime     = row[10]||"";
+        const facilityLocation = row[11]||"";  // 施設所在地
+        const region      = row[12]||"";
+        const rawCancel   = (row[13]||"").toUpperCase();
+        
         return {
           no,
-          arrival    : (rawArr==="TRUE")?"true":"false",
-          departure  : (rawDep==="TRUE")?"true":"false",
+          arrival:(rawArr==="TRUE")?"true":"false",
+          departure:(rawDep==="TRUE")?"true":"false",
           drName,
-          gBlank,
+          honorific,
           furigana,
           facility,
           remarks,
-          arrivalTime: arrTime,
-          departureTime: depTime,
+          arrivalTime:arrTime,
+          departureTime:depTime,
+          facilityLocation,
           region,
-          canceledByO: (rawCancel==="TRUE")
+          canceledByO:(rawCancel==="TRUE")
         };
       });
       result[sheetName] = parsed;
