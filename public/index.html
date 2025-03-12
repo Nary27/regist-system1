@@ -4,369 +4,979 @@
   <meta charset="UTF-8" />
   <title>受付確認システム</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
+    :root {
+      --primary: #2c3e50;
+      --primary-light: #34495e;
+      --accent: #3498db;
+      --accent-light: #5dade2;
+      --success: #2ecc71;
+      --warning: #f1c40f;
+      --danger: #e74c3c;
+      --light: #ecf0f1;
+      --dark: #2c3e50;
+      --gray: #95a5a6;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --radius: 8px;
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      margin:0; padding:0;
-      font-family:Arial, sans-serif;
-      background:#fafafa; color:#333;
-      user-select:none;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      color: var(--dark);
+      min-height: 100vh;
+      padding-bottom: 2rem;
+      user-select: none;
     }
-    h1 { margin:1rem 0; text-align:center; }
-    .main-buttons {
-      display:flex; gap:0.5rem; justify-content:center;
-      margin-bottom:0.5rem; flex-wrap:wrap;
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
     }
-    .main-button {
-      padding:0.8rem 1.2rem; background:#ddd;
-      border:2px solid #666; border-radius:5px;
-      cursor:pointer; font-weight:bold;
+
+    header {
+      background-color: var(--primary);
+      color: white;
+      padding: 1.5rem 0;
+      box-shadow: var(--shadow);
+      margin-bottom: 2rem;
     }
-    .main-button.active {
-      background:peachpuff; border-color:#333;
+
+    h1 {
+      font-size: 2rem;
+      text-align: center;
+      margin: 0;
+      letter-spacing: 1px;
+      position: relative;
+      display: inline-block;
+      left: 50%;
+      transform: translateX(-50%);
     }
-    .sub-buttons {
-      display:flex; gap:0.5rem; flex-wrap:wrap;
-      justify-content:center; margin-bottom:1rem;
+
+    h1::after {
+      content: '';
+      position: absolute;
+      width: 60%;
+      height: 3px;
+      background-color: var(--accent);
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 2px;
     }
-    .sub-button {
-      padding:0.5rem 1rem; background:#eee;
-      border:2px solid #666; border-radius:5px;
-      cursor:pointer; font-size:0.9rem;
+
+    .card {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-bottom: 2rem;
     }
-    .sub-button.active {
-      background:#ffc; border-color:#333;
+
+    /* メインタブ行 (1段目) */
+    .main-tabs {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-start;
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      padding: 1rem;
+      background-color: var(--light);
+      border-bottom: 1px solid rgba(0,0,0,0.1);
     }
-    #subSelect {
-      display:none; margin:0 auto; margin-bottom:1rem;
-      max-width:300px; font-size:1rem;
+
+    .main-tab-button {
+      padding: 0.8rem 1.2rem;
+      background: white;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-weight: 600;
+      white-space: nowrap;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      transition: var(--transition);
+      color: var(--dark);
     }
+
+    .main-tab-button:hover {
+      background: rgba(255,255,255,0.9);
+      transform: translateY(-2px);
+    }
+
+    .main-tab-button.active {
+      background: var(--accent);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+    }
+
+    /* サブタブ行 (2段目) */
+    .sub-tabs {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-start;
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      padding: 0.75rem 1rem;
+      background-color: rgba(255,255,255,0.8);
+    }
+
+    .sub-tab-button {
+      padding: 0.6rem 1rem;
+      background: var(--light);
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-weight: 500;
+      white-space: nowrap;
+      font-size: 0.9rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      transition: var(--transition);
+      color: var(--dark);
+    }
+
+    .sub-tab-button:hover {
+      background: var(--light);
+      transform: translateY(-1px);
+    }
+
+    .sub-tab-button.active {
+      background: var(--primary-light);
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(52, 73, 94, 0.3);
+    }
+
+    /* モバイル用プルダウン */
+    .select-container {
+      position: relative;
+      max-width: 320px;
+      margin: 0 auto;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .select-container.main-select {
+      margin-top: 1.5rem;
+    }
+
+    .select-container.sub-select {
+      margin-top: 0.5rem;
+    }
+
+    select {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border-radius: var(--radius);
+      border: 2px solid var(--gray);
+      background-color: white;
+      font-size: 1rem;
+      appearance: none;
+      cursor: pointer;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25);
+    }
+
+    .select-arrow {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--gray);
+    }
+
+    /* メインテーブル */
     .table-container {
-      width:95%; margin:0 auto; overflow-x:auto;
+      width: 100%;
+      margin: 0 auto;
+      overflow-x: auto;
+      padding: 0 1rem;
     }
+
     table {
-      width:100%; min-width:1520px; border-collapse:collapse;
-      margin-top:0.5rem;
-    }
-    th, td {
-      border:1px solid #ddd; padding:0.8rem; text-align:center;
-    }
-    /* 行のステータス別色 */
-    .status-coming    { background-color:#F0f080; color:#000; }
-    .status-leaving   { background-color:#0073a8; color:#000; }
-    .status-not-arrived { background-color:#fff;   color:#000; }
-    .status-cancelled { background-color:gray;   color:#fff; }
-
-    @media (max-width:600px) {
-      table { min-width: 770px; }
-      th, td { font-size:0.5rem; padding:0.3rem; }
-      h1 {font-size: 15px;}
+      width: 100%;
+      min-width: 1520px;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 0.5rem;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
     }
 
-    /* 来場数内訳テーブル */
+    th {
+      background-color: var(--primary);
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+    }
+
+    td {
+      padding: 1rem;
+      text-align: center;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    /* カラム特定スタイル */
+    td.facility-cell {
+      text-align: left;
+    }
+
+    td.time-cell {
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr {
+      transition: var(--transition);
+    }
+
+    .status-coming {
+      background-color: rgba(241, 196, 15, 0.15);
+    }
+    
+    .status-leaving {
+      background-color: rgba(52, 152, 219, 0.15);
+    }
+    
+    .status-not-arrived {
+      background-color: white;
+    }
+    
+    .status-cancelled {
+      background-color: rgba(52, 73, 94, 0.15);
+      color: #444;
+    }
+
+    /* Status Badges */
+    .status-badge {
+      display: inline-block;
+      padding: 0.4rem 0.8rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    .badge-coming {
+      background-color: var(--warning);
+      color: var(--dark);
+    }
+
+    .badge-leaving {
+      background-color: var(--accent);
+      color: white;
+    }
+
+    .badge-not-arrived {
+      background-color: var(--gray);
+      color: white;
+    }
+
+    .badge-cancelled {
+      background-color: #4a5568;
+      color: white;
+    }
+
+    /* 来場者内訳テーブル */
+    .summary-container {
+      display: flex;
+      justify-content: center;
+      padding: 0 1rem;
+    }
+
     .summary-table {
-      border-collapse:collapse; margin:1rem auto 0;
-      min-width:300px; max-width:620px;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 1rem auto;
+      min-width: 300px;
+      max-width: 620px;
+      background: white;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      width: 100%;
     }
-    .summary-table th, .summary-table td {
-      border:1px solid #aaa; padding:0.5rem; text-align:center;
+
+    .summary-table th {
+      background-color: var(--primary-light);
+      color: white;
+      padding: 0.8rem;
+      text-align: center;
+    }
+
+    .summary-table td {
+      border: none;
+      padding: 0.8rem;
+      text-align: center;
+      font-size: 1.1rem;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .summary-table td:first-child {
+      font-weight: 500;
+      text-align: left;
+      padding-left: 1.5rem;
+    }
+
+    .summary-table tr:nth-child(odd) {
+      background-color: rgba(0,0,0,0.02);
+    }
+
+    .refreshing {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background-color: rgba(0,0,0,0.7);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 100;
+    }
+
+    .refreshing.visible {
+      opacity: 1;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .empty-message {
+      text-align: center;
+      padding: 3rem;
+      color: var(--gray);
+      font-style: italic;
+    }
+    
+    .retry-button {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 0.9rem;
+    }
+    
+    .retry-button:hover {
+      background-color: var(--accent-light);
+    }
+
+    @media (max-width: 768px) {
+      /* 幅768px以下 → PCタブを隠し、プルダウン表示 */
+      .main-tabs, .sub-tabs {
+        display: none !important;
+      }
+      
+      .select-container {
+        display: block !important;
+      }
+
+      table {
+        min-width: 900px; /* モバイルのテーブル幅を調整 */
+      }
+      
+      th, td {
+        font-size: 0.9rem;
+        padding: 0.5rem;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .status-badge {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.7rem;
+      }
+      
+      td.time-cell {
+        font-size: 0.8rem;
+        line-height: 1.2;
+      }
+    }
+
+    @media (max-width: 480px) {
+      th, td {
+        font-size: 0.8rem;
+        padding: 0.4rem;
+      }
     }
   </style>
 </head>
 <body>
-  <h1 id="page-title">Loading...</h1>
-
-  <div class="main-buttons" id="main-buttons">
-    <div class="main-button" data-mode="menu">メニュー</div>
-    <div class="main-button" data-mode="all-aiueo">全体(あいうえお順)</div>
-    <div class="main-button" data-mode="all-area">全体(エリア順)</div>
-    <div class="main-button" data-mode="npkk">NPKK</div>
-    <div class="main-button" data-mode="opc">OPC</div>
+  <div class="refreshing" id="refreshNotice">
+    <div class="spinner"></div>
+    <span>データ更新中...</span>
   </div>
 
-  <div class="sub-buttons" id="sub-buttons"></div>
-  <select id="subSelect"></select>
+  <header>
+    <div class="container">
+      <h1 id="page-title">読み込み中...</h1>
+    </div>
+  </header>
 
-  <div class="table-container" id="table-container"></div>
-  <div id="summary-table-area" style="width:95%; margin:0 auto;"></div>
-  
+  <div class="container">
+    <div class="card">
+      <!-- メインタブ (PCタブ) -->
+      <div class="main-tabs" id="main-tabs"></div>
+      
+      <!-- メインタブ (モバイルプルダウン) -->
+      <div class="select-container main-select">
+        <select id="mainTabSelect"></select>
+        <div class="select-arrow">
+          <i class="fas fa-chevron-down"></i>
+        </div>
+      </div>
+
+      <!-- サブタブ (PCタブ) -->
+      <div class="sub-tabs" id="sub-tabs"></div>
+      
+      <!-- サブタブ (モバイルプルダウン) -->
+      <div class="select-container sub-select">
+        <select id="subTabSelect"></select>
+        <div class="select-arrow">
+          <i class="fas fa-chevron-down"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- テーブル表示領域 -->
+    <div class="card">
+      <div class="table-container" id="table-container"></div>
+    </div>
+
+    <!-- メニュー(来場者内訳) 表示領域 -->
+    <div class="summary-container">
+      <div id="summary-table-area"></div>
+    </div>
+  </div>
+
   <script>
-    let allSheetNames = [];
-    let allData = {};
-
-    let currentMainMode = "menu";
-    let currentSubSheet = "";
+    // グローバル変数
+    let allSheetNames = [];              // シート全体
+    let allData = {};                    // 全データ
+    let mainTabList = ["メニュー", "全体（あいうえお順）", "全体（エリア順）", "NPKK", "OPC"]; // メインタブ
+    let currentMainTab = "メニュー";      // 現在のメインタブ
+    let currentSubTab = "";              // 現在のサブタブ
+    let isRefreshing = false;            // データ更新中フラグ
 
     window.addEventListener("DOMContentLoaded", async () => {
-      // 1) シート情報を取得
+      // 1) /info でシート一覧取得
       const infoRes = await fetch("/info");
       const info = await infoRes.json();
-      document.getElementById("page-title").textContent = info.title || "スプレッドシート";
+      document.getElementById("page-title").textContent = info.title || "受付確認システム";
+      document.title = info.title || "受付確認システム";
+
+      // シート名一覧を取得
       allSheetNames = info.sheetNames || [];
 
-      // 初回データ取得
+      // 2) /batch-data
       await fetchAllData();
 
-      // タブ保持
-      const savedMainMode = localStorage.getItem("activeMainMode");
-      const savedSubSheet = localStorage.getItem("activeSubSheet");
-
-      if (savedMainMode && allSheetNames) {
-        setMainMode(savedMainMode);
+      // タブ生成 (PC・モバイル両方)
+      renderMainTabs();
+      
+      // 保存されたタブ状態を復元
+      const savedMainTab = localStorage.getItem("activeMainTab");
+      const savedSubTab = localStorage.getItem("activeSubTab");
+      
+      if (savedMainTab && mainTabList.includes(savedMainTab)) {
+        setActiveMainTab(savedMainTab);
       } else {
-        setMainMode("menu");
+        setActiveMainTab("メニュー");
       }
-      highlightActiveMainButton(currentMainMode);
-      renderSubButtons(currentMainMode);
-
-      if (savedSubSheet && allSheetNames.includes(savedSubSheet)) {
-        handleSubButtonClick(savedSubSheet, false);
-      } else {
-        // 初期状態がmenuなら来場数内訳を表示
-        if (currentMainMode==="menu") {
-          await showSummaryTable();
-        }
+      
+      if (savedSubTab && allSheetNames.includes(savedSubTab)) {
+        setActiveSubTab(savedSubTab);
       }
 
-      // ★ 20秒ごとにポーリング
+      // 30秒ポーリング
       setInterval(async () => {
+        showRefreshNotice(true);
         await fetchAllData();
-        if (currentMainMode==="menu") {
-          await showSummaryTable();
-        } else if (currentSubSheet) {
-          renderTable(currentSubSheet);
+        if (currentMainTab === "メニュー" && !currentSubTab) {
+          showSummaryTable(); // メニュー時→来場者内訳
+        } else if (currentSubTab) {
+          renderSheetTable(currentSubTab);
         }
-      }, 30000); // ← 30000ミリ秒=30秒
+        showRefreshNotice(false);
+      }, 30000);
     });
+
+    // データ更新通知表示
+    function showRefreshNotice(show) {
+      const notice = document.getElementById("refreshNotice");
+      isRefreshing = show;
+      
+      if (show) {
+        notice.classList.add("visible");
+      } else {
+        notice.classList.remove("visible");
+      }
+    }
 
     // batch-data取得
     async function fetchAllData() {
-      const res = await fetch("/batch-data");
-      if (!res.ok) {
-        console.error("[fetchAllData] error", res.status);
-        return;
+      showRefreshNotice(true);
+      try {
+        const res = await fetch("/batch-data");
+        if (!res.ok) {
+          console.error("[fetchAllData] error", res.status);
+          return;
+        }
+        allData = await res.json();
+      } catch (error) {
+        console.error("[fetchAllData] fetch error", error);
+      } finally {
+        showRefreshNotice(false);
       }
-      allData = await res.json();
-      console.log("[fetchAllData]", allData);
     }
 
-    // 来場数内訳テーブル表示
-    async function showSummaryTable() {
-      const summaryArea = document.getElementById("summary-table-area");
-      summaryArea.innerHTML = "";
-
-      const res = await fetch("/summary-data");
-      if (!res.ok) {
-        summaryArea.innerHTML = "<p>来場数内訳取得エラー</p>";
-        return;
-      }
-      const tableData = await res.json();
-      if (tableData.length===0) {
-        summaryArea.innerHTML="<p>来場数内訳がありません</p>";
-        return;
-      }
-
-      let html = `<table class="summary-table"><tbody>`;
-
-      tableData.forEach(row => {
-        // 特別行か判定
-        const isSpecial = (row[0] === "総来場者数(新規含む)");
-        let rowStyle = "";
-        if (isSpecial) {
-          // 背景薄グレー + 太字
-          rowStyle = ` style="background-color:#eee; font-weight:bold;"`;
-        }
-
-        html += `<tr${rowStyle}>`;
-
-        // 1列目 => 右寄せ, 1.2rem
-        if (row.length>0) {
-          html += `<td style="font-size:1.2rem; text-align:right;">${row[0]}</td>`;
-        }
-        // 2列目 => 左寄せ, 1.2rem
-        if (row.length>1) {
-          html += `<td style="font-size:1.2rem; text-align:left;">${row[1]}</td>`;
-        }
-        // 3列目以降 => 中央寄せ, 1.2rem
-        for (let c=2; c<row.length; c++) {
-          html += `<td style="font-size:1.2rem;">${row[c]}</td>`;
-        }
-        html += "</tr>";
+    // メインタブ生成 (PC・モバイル)
+    function renderMainTabs() {
+      const mainTabsContainer = document.getElementById("main-tabs");
+      const mainTabSelect = document.getElementById("mainTabSelect");
+      
+      mainTabsContainer.innerHTML = "";
+      mainTabSelect.innerHTML = "";
+      
+      // メインタブ生成
+      mainTabList.forEach(tabName => {
+        // PC用タブボタン
+        const btn = document.createElement("div");
+        btn.classList.add("main-tab-button");
+        btn.textContent = tabName;
+        btn.addEventListener("click", () => setActiveMainTab(tabName));
+        mainTabsContainer.appendChild(btn);
+        
+        // モバイル用プルダウン
+        const opt = document.createElement("option");
+        opt.value = tabName;
+        opt.textContent = tabName;
+        mainTabSelect.appendChild(opt);
       });
-
-      html += "</tbody></table>";
-      summaryArea.innerHTML = html;
-    }
-
-    // メインボタン押下
-    document.getElementById("main-buttons").addEventListener("click", async (e) => {
-      const btn = e.target.closest(".main-button");
-      if (!btn) return;
-
-      const mode=btn.dataset.mode;
-      setMainMode(mode);
-      highlightActiveMainButton(mode);
-      renderSubButtons(mode);
-
-      if (mode==="menu") {
-        await showSummaryTable();
-      } else {
-        document.getElementById("summary-table-area").innerHTML="";
-      }
-    });
-
-    function setMainMode(mode) {
-      currentMainMode=mode;
-      localStorage.setItem("activeMainMode", mode);
-      currentSubSheet="";
-      localStorage.removeItem("activeSubSheet");
-      document.getElementById("table-container").innerHTML="";
-    }
-
-    function highlightActiveMainButton(mode) {
-      document.querySelectorAll(".main-button").forEach(mBtn=>{
-        mBtn.classList.remove("active");
-        if (mBtn.dataset.mode===mode){
-          mBtn.classList.add("active");
-        }
+      
+      // モバイルプルダウンのイベント
+      mainTabSelect.addEventListener("change", (e) => {
+        setActiveMainTab(e.target.value);
       });
     }
-
-    // サブボタン or プルダウン生成
-    function renderSubButtons(mode){
-      const subContainer=document.getElementById("sub-buttons");
-      const subSelect=document.getElementById("subSelect");
-      subContainer.innerHTML="";
-      subSelect.innerHTML="";
-
-      let filtered=[];
-      if(mode==="menu"){
-        filtered=[...allSheetNames];
-      } else if(mode==="all-aiueo"){
-        filtered=allSheetNames.filter(n=>n.includes("全体(あいうえお順)"));
-      } else if(mode==="all-area"){
-        filtered=allSheetNames.filter(n=>n.includes("全体(エリア順)"));
-      } else if(mode==="npkk"){
-        filtered=allSheetNames.filter(n=>n.startsWith("N."));
-      } else if(mode==="opc"){
-        filtered=allSheetNames.filter(n=>n.startsWith("O."));
+    
+    // サブタブ生成
+    function renderSubTabs(mainTabName) {
+      const subTabsContainer = document.getElementById("sub-tabs");
+      const subTabSelect = document.getElementById("subTabSelect");
+      
+      subTabsContainer.innerHTML = "";
+      subTabSelect.innerHTML = "";
+      
+      // メインタブに応じたサブタブをフィルタリング
+      let filteredSheets = [];
+      
+      switch(mainTabName) {
+        case "メニュー":
+          filteredSheets = [...allSheetNames];
+          break;
+        case "全体（あいうえお順）":
+          filteredSheets = allSheetNames.filter(name => 
+            name.includes("全体（あいうえお順）") || 
+            name.includes("全体(あいうえお順)"));
+          break;
+        case "全体（エリア順）":
+          filteredSheets = allSheetNames.filter(name => 
+            name.includes("全体（エリア順）") || 
+            name.includes("全体(エリア順)"));
+          break;
+        case "NPKK":
+          filteredSheets = allSheetNames.filter(name => name.startsWith("N."));
+          break;
+        case "OPC":
+          filteredSheets = allSheetNames.filter(name => name.startsWith("O."));
+          break;
       }
-
-      const isMobile=(window.innerWidth<=600);
-      if(mode==="menu" && isMobile){
-        subContainer.style.display="none";
-        subSelect.style.display="inline-block";
-        const placeholderOpt=document.createElement("option");
-        placeholderOpt.value="";
-        placeholderOpt.textContent="▼シートを選択";
-        subSelect.appendChild(placeholderOpt);
-
-        filtered.forEach(sheetName=>{
-          const opt=document.createElement("option");
-          opt.value=sheetName;
-          opt.textContent=sheetName;
-          subSelect.appendChild(opt);
-        });
-        subSelect.onchange=(ev)=>{
-          const val=ev.target.value;
-          if(!val)return;
-          handleSubButtonClick(val);
-        };
-      } else {
-        subContainer.style.display="flex";
-        subSelect.style.display="none";
-        filtered.forEach(sheetName=>{
-          const b=document.createElement("div");
-          b.classList.add("sub-button");
-          b.textContent=sheetName;
-          b.onclick=()=>handleSubButtonClick(sheetName);
-          subContainer.appendChild(b);
-        });
+      
+      // サブタブが無い場合は非表示
+      if (filteredSheets.length === 0) {
+        subTabsContainer.style.display = "none";
+        document.querySelector(".select-container.sub-select").style.display = "none";
+        return;
       }
+      
+      // サブタブを表示
+      subTabsContainer.style.display = "flex";
+      document.querySelector(".select-container.sub-select").style.display = "none"; // モバイル時は表示
+      
+      // サブタブ生成
+      filteredSheets.forEach(sheetName => {
+        // PC用サブタブボタン
+        const btn = document.createElement("div");
+        btn.classList.add("sub-tab-button");
+        btn.textContent = sheetName;
+        btn.addEventListener("click", () => setActiveSubTab(sheetName));
+        subTabsContainer.appendChild(btn);
+        
+        // モバイル用プルダウン
+        const opt = document.createElement("option");
+        opt.value = sheetName;
+        opt.textContent = sheetName;
+        subTabSelect.appendChild(opt);
+      });
+      
+      // モバイル用プルダウンの先頭に選択肢を追加
+      const defaultOpt = document.createElement("option");
+      defaultOpt.value = "";
+      defaultOpt.textContent = "-- シートを選択 --";
+      subTabSelect.insertBefore(defaultOpt, subTabSelect.firstChild);
+      
+      // モバイルプルダウンのイベント
+      subTabSelect.addEventListener("change", (e) => {
+        if (e.target.value) {
+          setActiveSubTab(e.target.value);
+        } else {
+          // 空選択の場合はメインタブの表示に戻る
+          resetSubTab();
+        }
+      });
     }
-
-    function handleSubButtonClick(sheetName, store=true){
-      highlightActiveSubButton(sheetName);
-      currentSubSheet=sheetName;
-      if(store) localStorage.setItem("activeSubSheet",sheetName);
-      renderTable(sheetName);
-    }
-    function highlightActiveSubButton(sheetName){
-      document.querySelectorAll(".sub-button").forEach(btn=>{
+    
+    // メインタブをアクティブに
+    function setActiveMainTab(tabName) {
+      currentMainTab = tabName;
+      localStorage.setItem("activeMainTab", tabName);
+      
+      // メインタブのハイライト
+      document.querySelectorAll(".main-tab-button").forEach(btn => {
         btn.classList.remove("active");
-        if(btn.textContent===sheetName){
+        if (btn.textContent === tabName) {
           btn.classList.add("active");
         }
+      });
+      
+      // モバイルプルダウンも同期
+      document.getElementById("mainTabSelect").value = tabName;
+      
+      // サブタブを生成
+      renderSubTabs(tabName);
+      
+      // メインタブ切り替え時にはサブタブをリセット
+      resetSubTab();
+      
+      // メニューの場合は来場者内訳を表示
+      if (tabName === "メニュー") {
+        showSummaryTable();
+      } else {
+        document.getElementById("summary-table-area").innerHTML = "";
+      }
+    }
+    
+    // サブタブをアクティブに
+    function setActiveSubTab(tabName) {
+      currentSubTab = tabName;
+      localStorage.setItem("activeSubTab", tabName);
+      
+      // サブタブのハイライト
+      document.querySelectorAll(".sub-tab-button").forEach(btn => {
+        btn.classList.remove("active");
+        if (btn.textContent === tabName) {
+          btn.classList.add("active");
+        }
+      });
+      
+      // モバイルプルダウンも同期
+      document.getElementById("subTabSelect").value = tabName;
+      
+      // 来場者内訳をクリア
+      document.getElementById("summary-table-area").innerHTML = "";
+      
+      // シートデータを表示
+      renderSheetTable(tabName);
+    }
+    
+    // サブタブリセット
+    function resetSubTab() {
+      currentSubTab = "";
+      localStorage.removeItem("activeSubTab");
+      
+      document.querySelectorAll(".sub-tab-button").forEach(btn => {
+        btn.classList.remove("active");
+      });
+      
+      document.getElementById("subTabSelect").value = "";
+      document.getElementById("table-container").innerHTML = "";
+    }
+
+    // 来場者内訳 (メニュー時に表示)
+    async function showSummaryTable() {
+      const summaryDiv = document.getElementById("summary-table-area");
+      summaryDiv.innerHTML = "";
+
+      showRefreshNotice(true);
+
+      try {
+        const res = await fetch("/summary-data");
+        if (!res.ok) {
+          summaryDiv.innerHTML = '<div class="empty-message"><i class="fas fa-exclamation-circle"></i> 来場者内訳取得エラー</div>';
+          return;
+        }
+        const tableData = await res.json();
+        if (tableData.length === 0) {
+          summaryDiv.innerHTML = '<div class="empty-message"><i class="fas fa-info-circle"></i> 来場者内訳がありません</div>';
+          return;
+        }
+
+        // スプレッドシートの特定のセルからデータを取得
+        // B1: 総登録者数, B2: 総来場者数(新規含む), B3: 新規, B5: キャンセル, B7: 退場済み
+        let totalRegistered = tableData[0][1] || 0;  // B1
+        let totalVisitors = tableData[1][1] || 0;    // B2
+        let totalNewVisitors = tableData[2][1] || 0; // B3
+        let totalCancelled = tableData[4][1] || 0;   // B5
+        let totalLeaving = tableData[5][1] || 0;     // B7
+
+        // テーブルを作成
+        let html = `<table class="summary-table"><tbody>`;
+        
+        // セクション1: 総登録者と来場者
+        html += `
+          <tr>
+            <th colspan="2">登録・来場状況</th>
+          </tr>
+          <tr>
+            <td>総登録者</td>
+            <td>${totalRegistered}</td>
+          </tr>
+          <tr>
+            <td>来場者（新規含む）</td>
+            <td style="font-size: 1.5rem; font-weight: bold;">${totalVisitors}</td>
+          </tr>`;
+          
+        // セクション2: その他（キャンセルと新規）
+        html += `
+          <tr>
+            <th colspan="2">その他</th>
+          </tr>
+          <tr>
+            <td>キャンセル</td>
+            <td>${totalCancelled}</td>
+          </tr>
+          <tr>
+            <td>新規</td>
+            <td>${totalNewVisitors}</td>
+          </tr>`;
+          
+        // セクション3: 退場数
+        html += `
+          <tr>
+            <th colspan="2">退場状況</th>
+          </tr>
+          <tr>
+            <td>退場済</td>
+            <td>${totalLeaving}</td>
+          </tr>`;
+          
+        html += "</tbody></table>";
+
+        summaryDiv.innerHTML = html;
+      } catch (error) {
+        console.error("[showSummaryTable] error", error);
+        summaryDiv.innerHTML = '<div class="empty-message"><i class="fas fa-exclamation-circle"></i> データ取得中にエラーが発生しました</div>';
+      } finally {
+        showRefreshNotice(false);
+      }
+    }
+
+    // データ再取得と現在のタブ再描画
+    async function fetchAllDataAndRenderCurrent() {
+      await fetchAllData();
+      if (currentMainTab === "メニュー" && !currentSubTab) {
+        showSummaryTable();
+      } else if (currentSubTab) {
+        renderSheetTable(currentSubTab);
+      }
+    }
+
+    // 状態テキスト取得
+    function getStatusText(row) {
+      let st = "未入場";
+      if (row.arrival === "true" && row.departure === "false") {
+        st = "来場中";
+      } else if (row.departure === "true") {
+        st = "退場済み";
+      }
+      if (row.canceledByO) {
+        st = "キャンセル";
+      }
+      return st;
+    }
+
+    // 状態に応じたバッジHTML取得
+    function getStatusBadge(status) {
+      let badgeClass = "";
+      let icon = "";
+      
+      switch (status) {
+        case "来場中":
+          badgeClass = "badge-coming";
+          icon = '<i class="fas fa-user-check"></i> ';
+          break;
+        case "退場済み":
+          badgeClass = "badge-leaving";
+          icon = '<i class="fas fa-sign-out-alt"></i> ';
+          return `<span class="status-badge ${badgeClass}">${icon}退場済</span>`;
+        case "キャンセル":
+          badgeClass = "badge-cancelled";
+          icon = '<i class="fas fa-ban"></i> ';
+          break;
+        default:
+          badgeClass = "badge-not-arrived";
+          icon = '<i class="fas fa-hourglass-half"></i> ';
+      }
+      
+      return `<span class="status-badge ${badgeClass}">${icon}${status}</span>`;
+    }
+
+    // 全て空の列を除外
+    function filterEmptyColumns(data, columns) {
+      // 重要なカラムは常に表示するためのリスト
+      const essentialColumns = ["statusText", "drName", "facility"];
+      
+      return columns.filter(col => {
+        // 重要カラムの場合は常に表示
+        if (essentialColumns.includes(col.key)) {
+          return true;
+        }
+        
+        let hasVal = false;
+        for (const r of data) {
+          const val = (r[col.key] || "").trim();
+          if (val !== "") {
+            hasVal = true;
+            break;
+          }
+        }
+        return hasVal;
       });
     }
 
     // シートテーブル描画
-    function renderTable(sheetName){
-      const container=document.getElementById("table-container");
-      container.innerHTML="";
+    function renderSheetTable(sheetName) {
+      const container = document.getElementById("table-container");
+      container.innerHTML = "";
 
-      const data=allData[sheetName]||[];
-      if(data.length===0){
-        container.innerHTML="<p>該当データがありません。</p>";
+      const data = allData[sheetName] || [];
+      if (data.length === 0) {
+        container.innerHTML = '<div class="empty-message"><i class="fas fa-info-circle"></i> 該当データがありません。</div>';
         return;
       }
-      const table=document.createElement("table");
-      const thead=document.createElement("thead");
-      thead.innerHTML=`
-        <tr>
-          <th>No</th>
-          <th>状態</th>
-          <th>DR氏名</th>
-          <th></th>
-          <th>フリガナ</th>
-          <th>施設名</th>
-          <th>備考</th>
-          <th>ご来場時間</th>
-          <th>ご退場時間</th>
-          <th>地域区分</th>
-        </tr>
-      `;
+
+      // 状態テキスト付与
+      data.forEach(r => {
+        if (!r.statusText) {
+          r.statusText = getStatusText(r);
+        }
+      });
+
+      // カラム定義 - サーバーから返されるデータフィールドと一致
+      const columns = [
+        { key: "statusText", header: "状態" },
+        { key: "drName", header: "DR氏名", width: "150px" },
+        { key: "honorific", header: "敬称", width: "50px" },
+        { key: "furigana", header: "フリガナ", fontSize: "0.8rem", width: "150px" },
+        { key: "facility", header: "施設名", className: "facility-cell", width: "225px" },
+        { key: "remarks", header: "備考", width: "100px" },
+        { key: "arrivalTime", header: "来場時間", className: "time-cell", width: "120px" },
+        { key: "departureTime", header: "退場時間", className: "time-cell", width: "120px" },
+        { key: "facilityLocation", header: "施設所在地", width: "120px" },
+        { key: "region", header: "地域区分", width: "140px" }
+      ];
+
+      // 空の列を非表示にする
+      let visibleCols = filterEmptyColumns(data, columns);
+
+      const table = document.createElement("table");
+
+      const thead = document.createElement("thead");
+      let thHtml = "<tr>";
+      visibleCols.forEach(col => {
+        thHtml += `<th${col.width ? ` style="min-width:${col.width};"` : ''}>${col.header}</th>`;
+      });
+      thHtml += "</tr>";
+      thead.innerHTML = thHtml;
       table.appendChild(thead);
 
-      const tbody=document.createElement("tbody");
-      data.forEach(row=>{
-        const {
-          no, arrival, departure, drName, gBlank,
-          furigana, facility, remarks,
-          arrivalTime, departureTime, region,
-          canceledByO
-        }=row;
-
-        let statusClass="status-not-arrived";
-        let statusText="未入場";
-        if(arrival==="true" && departure==="false"){
-          statusClass="status-coming";
-          statusText="来場中";
-        } else if(departure==="true"){
-          statusClass="status-leaving";
-          statusText="退場済み";
-        }
-        if(canceledByO){
-          statusClass="status-cancelled";
-          statusText="キャンセル";
+      const tbody = document.createElement("tbody");
+      data.forEach(row => {
+        let stClass = "status-not-arrived";
+        if (row.statusText === "来場中") {
+          stClass = "status-coming";
+        } else if (row.statusText === "退場済み") {
+          stClass = "status-leaving";
+        } else if (row.statusText === "キャンセル") {
+          stClass = "status-cancelled";
         }
 
-        const tr=document.createElement("tr");
-        tr.classList.add(statusClass);
-        tr.innerHTML=`
-          <td>${no||""}</td>
-          <td>${statusText}</td>
-          <td>${drName||""}</td>
-          <td>${gBlank||""}</td>
-          <td>${furigana||""}</td>
-          <td>${facility||""}</td>
-          <td>${remarks||""}</td>
-          <td>${arrivalTime||""}</td>
-          <td>${departureTime||""}</td>
-          <td>${region||""}</td>
-        `;
+        const tr = document.createElement("tr");
+        tr.classList.add(stClass);
+
+        let tdHtml = "";
+        visibleCols.forEach(col => {
+          const val = (row[col.key] || "").trim();
+          if (col.key === "statusText") {
+            tdHtml += `<td>${getStatusBadge(val)}</td>`;
+          } else if (col.key === "furigana") {
+            tdHtml += `<td style="font-size:${col.fontSize || '1rem'}">${val}</td>`;
+          } else {
+            let className = col.className || '';
+            tdHtml += `<td class="${className}">${val}</td>`;
+          }
+        });
+        tr.innerHTML = tdHtml;
         tbody.appendChild(tr);
       });
       table.appendChild(tbody);
+
       container.appendChild(table);
     }
   </script>
