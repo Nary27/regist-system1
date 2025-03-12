@@ -403,6 +403,539 @@
     .retry-button:hover {
       background-color: var(--accent-light);
     }
+    
+    .error-container {
+      background-color: rgba(231, 76, 60, 0.1);
+      border-left: 4px solid var(--danger);
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: var(--radius);
+    }
+    
+    .error-title {
+      color: var(--danger);
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    
+    .error-message {
+      color: var(--dark);
+      margin-bottom: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+      /* 幅768px以下 → PCタブを隠し、プルダウン表示 */
+      .main-tabs, .sub-tabs {
+        display: none !important;
+      }
+      
+      .select-container {
+        display: block !important;
+      }
+
+      table {
+        min-width: 900px; /* モバイルのテーブル幅を調整 */
+      }
+      
+      th, td {
+        font-size: 0.9rem;
+        padding: 0.5rem;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .status-badge {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.7rem;
+      }
+      
+      td.time-cell {
+        font-size: 0.8rem;
+        line-height: 1.2;
+      }
+    }
+
+    @media (max-width: 480px) {
+      th, td {
+        font-size: 0.8rem;
+        padding: 0.4rem;
+      }
+    }
+  </style>padding: 0.8rem 1rem;
+      border-radius: var(--radius);
+      border: 2px solid var(--gray);
+      background-color: white;
+      font-size: 1rem;
+      appearance: none;
+      cursor: pointer;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25);
+    }
+
+    .select-arrow {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--gray);
+    }
+
+    /* メインテーブル */
+    .table-container {
+      width: 100%;
+      margin: 0 auto;
+      overflow-x: auto;
+      padding: 0 1rem;
+    }
+
+    table {
+      width: 100%;
+      min-width: 1520px;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 0.5rem;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    th {
+      background-color: var(--primary);
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+    }
+
+    td {
+      padding: 1rem;
+      text-align: center;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    /* カラム特定スタイル */
+    td.facility-cell {
+      text-align: left;
+    }
+
+    td.time-cell {
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr {
+      transition: var(--transition);
+    }
+
+    .status-coming {
+      background-color: rgba(241, 196, 15, 0.15);
+    }
+    
+    .status-leaving {
+      background-color: rgba(52, 152, 219, 0.15);
+    }
+    
+    .status-not-arrived {
+      background-color: white;
+    }
+    
+    .status-cancelled {
+      background-color: rgba(52, 73, 94, 0.15);
+      color: #444;
+    }
+
+    /* Status Badges */
+    .status-badge {
+      display: inline-block;
+      padding: 0.4rem 0.8rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    .badge-coming {
+      background-color: var(--warning);
+      color: var(--dark);
+    }
+
+    .badge-leaving {
+      background-color: var(--accent);
+      color: white;
+    }
+
+    .badge-not-arrived {
+      background-color: var(--gray);
+      color: white;
+    }
+
+    .badge-cancelled {
+      background-color: #4a5568;
+      color: white;
+    }
+
+    /* 来場者内訳テーブル */
+    .summary-container {
+      display: flex;
+      justify-content: center;
+      padding: 0 1rem;
+    }
+
+    .summary-table {
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 1rem auto;
+      min-width: 300px;
+      max-width: 620px;
+      background: white;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      width: 100%;
+    }
+
+    .summary-table th {
+      background-color: var(--primary-light);
+      color: white;
+      padding: 0.8rem;
+      text-align: center;
+    }
+
+    .summary-table td {
+      border: none;
+      padding: 0.8rem;
+      text-align: center;
+      font-size: 1.1rem;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .summary-table td:first-child {
+      font-weight: 500;
+      text-align: left;
+      padding-left: 1.5rem;
+    }
+
+    .summary-table tr:nth-child(odd) {
+      background-color: rgba(0,0,0,0.02);
+    }
+
+    .refreshing {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background-color: rgba(0,0,0,0.7);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 100;
+    }
+
+    .refreshing.visible {
+      opacity: 1;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .empty-message {
+      text-align: center;
+      padding: 3rem;
+      color: var(--gray);
+      font-style: italic;
+    }
+    
+    .retry-button {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 0.9rem;
+    }
+    
+    .retry-button:hover {
+      background-color: var(--accent-light);
+    }
+    
+    .error-container {
+      background-color: rgba(231, 76, 60, 0.1);
+      border-left: 4px solid var(--danger);
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: var(--radius);
+    }
+    
+    .error-title {
+      color: var(--danger);
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    
+    .error-message {
+      color: var(--dark);
+      margin-bottom: 0.5rem;
+    }border-radius: var(--radius);
+      border: 2px solid var(--gray);
+      background-color: white;
+      font-size: 1rem;
+      appearance: none;
+      cursor: pointer;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25);
+    }
+
+    .select-arrow {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--gray);
+    }
+
+    /* メインテーブル */
+    .table-container {
+      width: 100%;
+      margin: 0 auto;
+      overflow-x: auto;
+      padding: 0 1rem;
+    }
+
+    table {
+      width: 100%;
+      min-width: 1520px;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 0.5rem;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    th {
+      background-color: var(--primary);
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+    }
+
+    td {
+      padding: 1rem;
+      text-align: center;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    /* カラム特定スタイル */
+    td.facility-cell {
+      text-align: left;
+    }
+
+    td.time-cell {
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr {
+      transition: var(--transition);
+    }
+
+    .status-coming {
+      background-color: rgba(241, 196, 15, 0.15);
+    }
+    
+    .status-leaving {
+      background-color: rgba(52, 152, 219, 0.15);
+    }
+    
+    .status-not-arrived {
+      background-color: white;
+    }
+    
+    .status-cancelled {
+      background-color: rgba(52, 73, 94, 0.15);
+      color: #444;
+    }
+
+    /* Status Badges */
+    .status-badge {
+      display: inline-block;
+      padding: 0.4rem 0.8rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    .badge-coming {
+      background-color: var(--warning);
+      color: var(--dark);
+    }
+
+    .badge-leaving {
+      background-color: var(--accent);
+      color: white;
+    }
+
+    .badge-not-arrived {
+      background-color: var(--gray);
+      color: white;
+    }
+
+    .badge-cancelled {
+      background-color: #4a5568;
+      color: white;
+    }
+
+    /* 来場者内訳テーブル */
+    .summary-container {
+      display: flex;
+      justify-content: center;
+      padding: 0 1rem;
+    }
+
+    .summary-table {
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 1rem auto;
+      min-width: 300px;
+      max-width: 620px;
+      background: white;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      width: 100%;
+    }
+
+    .summary-table th {
+      background-color: var(--primary-light);
+      color: white;
+      padding: 0.8rem;
+      text-align: center;
+    }
+
+    .summary-table td {
+      border: none;
+      padding: 0.8rem;
+      text-align: center;
+      font-size: 1.1rem;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .summary-table td:first-child {
+      font-weight: 500;
+      text-align: left;
+      padding-left: 1.5rem;
+    }
+
+    .summary-table tr:nth-child(odd) {
+      background-color: rgba(0,0,0,0.02);
+    }
+
+    .refreshing {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background-color: rgba(0,0,0,0.7);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 100;
+    }
+
+    .refreshing.visible {
+      opacity: 1;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .empty-message {
+      text-align: center;
+      padding: 3rem;
+      color: var(--gray);
+      font-style: italic;
+    }
+    
+    .retry-button {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 0.9rem;
+    }
+    
+    .retry-button:hover {
+      background-color: var(--accent-light);
+    }
 
     @media (max-width: 768px) {
       /* 幅768px以下 → PCタブを隠し、プルダウン表示 */
@@ -503,18 +1036,63 @@
     let currentSubTab = "";              // 現在のサブタブ
     let isRefreshing = false;            // データ更新中フラグ
 
+    // 初期化処理（データ取得とエラーハンドリング）
+    async function initializeApp() {
+      try {
+        // 1) /info でシート一覧取得
+        showRefreshNotice(true);
+        const infoRes = await fetch("/info");
+        if (!infoRes.ok) {
+          document.getElementById("table-container").innerHTML = 
+            '<div class="empty-message"><i class="fas fa-exclamation-circle"></i> 只今サーバーが混在しております。しばらく経ってから、ページを再読み込みしてください。<br><button class="retry-button" onclick="location.reload()">ページを再読み込み</button></div>';
+          return false;
+        }
+        
+        const info = await infoRes.json();
+        document.getElementById("page-title").textContent = info.title || "受付確認システム";
+        document.title = info.title || "受付確認システム";
+        
+        // シート名一覧を取得
+        allSheetNames = info.sheetNames || [];
+        if (allSheetNames.length === 0) {
+          document.getElementById("table-container").innerHTML = 
+            '<div class="empty-message"><i class="fas fa-info-circle"></i> 表示できるデータがありません。しばらく経ってから再度お試しください。<br><button class="retry-button" onclick="location.reload()">再試行</button></div>';
+          return false;
+        }
+        
+        // 2) /batch-data でデータ取得
+        const dataRes = await fetch("/batch-data");
+        if (!dataRes.ok) {
+          document.getElementById("table-container").innerHTML = 
+            '<div class="empty-message"><i class="fas fa-exclamation-circle"></i> 只今サーバーが混在しております。しばらく経ってから、ページを再読み込みしてください。<br><button class="retry-button" onclick="location.reload()">ページを再読み込み</button></div>';
+          return false;
+        }
+        
+        allData = await dataRes.json();
+        
+        if (Object.keys(allData).length === 0) {
+          document.getElementById("table-container").innerHTML = 
+            '<div class="empty-message"><i class="fas fa-info-circle"></i> 表示できるデータがありません。しばらく経ってから再度お試しください。<br><button class="retry-button" onclick="location.reload()">再試行</button></div>';
+          return false;
+        }
+        
+        showRefreshNotice(false);
+        return true;
+      } catch (error) {
+        console.error("初期化エラー:", error);
+        document.getElementById("table-container").innerHTML = 
+          '<div class="empty-message"><i class="fas fa-exclamation-circle"></i> 通信エラーが発生しました。ネットワーク接続を確認して、再度お試しください。<br><button class="retry-button" onclick="location.reload()">再試行</button></div>';
+        showRefreshNotice(false);
+        return false;
+      }
+    }
+
     window.addEventListener("DOMContentLoaded", async () => {
-      // 1) /info でシート一覧取得
-      const infoRes = await fetch("/info");
-      const info = await infoRes.json();
-      document.getElementById("page-title").textContent = info.title || "受付確認システム";
-      document.title = info.title || "受付確認システム";
-
-      // シート名一覧を取得
-      allSheetNames = info.sheetNames || [];
-
-      // 2) /batch-data
-      await fetchAllData();
+      // アプリ初期化（データ取得）
+      const initialized = await initializeApp();
+      if (!initialized) {
+        return; // 初期化に失敗した場合は処理を中断
+      }
 
       // タブ生成 (PC・モバイル両方)
       renderMainTabs();
@@ -540,6 +1118,10 @@
           summaryBtn.classList.add("active");
         }
         
+        // タイトル表示を維持 - ページタイトルを保持
+        const title = document.getElementById("page-title").textContent || "受付確認システム";
+        document.title = title;
+        
         showSummaryTable();
       } else if (savedSubTab && allSheetNames.includes(savedSubTab)) {
         // そうでなければ保存されていたサブタブを復元
@@ -551,21 +1133,19 @@
 
       // 30秒ポーリング
       setInterval(async () => {
-        showRefreshNotice(true);
-        await fetchAllData();
-        
-        const isMobileNow = window.innerWidth <= 768;
-        const isSummaryActive = isMobileNow && 
-                               currentMainTab === "メニュー" && 
-                               document.getElementById("subTabSelect").value === "summary";
-        
-        if (currentMainTab === "メニュー" && (!currentSubTab || isSummaryActive)) {
-          showSummaryTable(); // メニュー時→来場者内訳
-        } else if (currentSubTab) {
-          renderSheetTable(currentSubTab);
+        const success = await fetchAllData();
+        if (success) {
+          const isMobileNow = window.innerWidth <= 768;
+          const isSummaryActive = isMobileNow && 
+                                 currentMainTab === "メニュー" && 
+                                 document.getElementById("subTabSelect").value === "summary";
+          
+          if (currentMainTab === "メニュー" && (!currentSubTab || isSummaryActive)) {
+            showSummaryTable(); // メニュー時→来場者内訳
+          } else if (currentSubTab) {
+            renderSheetTable(currentSubTab);
+          }
         }
-        
-        showRefreshNotice(false);
       }, 30000);
     });
     
@@ -583,6 +1163,10 @@
           if (summaryBtn && !currentSubTab) {
             summaryBtn.classList.add("active");
             document.getElementById("subTabSelect").value = "summary";
+            
+            // タイトル表示を保持
+            const title = document.getElementById("page-title").textContent || "受付確認システム";
+            document.title = title;
           }
         }
       }
@@ -604,18 +1188,34 @@
       }
     }
 
-    // batch-data取得
+    // batch-data取得（更新時のエラーハンドリング含む）
     async function fetchAllData() {
       showRefreshNotice(true);
       try {
         const res = await fetch("/batch-data");
         if (!res.ok) {
           console.error("[fetchAllData] error", res.status);
-          return;
+          // エラー表示（現在の表示は維持）
+          const errorNotice = document.createElement("div");
+          errorNotice.className = "empty-message";
+          errorNotice.innerHTML = '<i class="fas fa-exclamation-triangle"></i> データの更新に失敗しました。自動的に再試行します...';
+          
+          // 一時的に表示して数秒後に消える
+          document.getElementById("table-container").appendChild(errorNotice);
+          setTimeout(() => {
+            if (errorNotice.parentNode) {
+              errorNotice.parentNode.removeChild(errorNotice);
+            }
+          }, 5000);
+          
+          return false;
         }
         allData = await res.json();
+        return true;
       } catch (error) {
         console.error("[fetchAllData] fetch error", error);
+        // エラー表示（サイレント）
+        return false;
       } finally {
         showRefreshNotice(false);
       }
@@ -788,6 +1388,8 @@
             }
           });
           
+          // タイトル表示を維持（ページタイトルを変更しない）
+          
           // 来場者内訳を表示
           document.getElementById("table-container").innerHTML = "";
           showSummaryTable();
@@ -832,7 +1434,12 @@
           if (summaryBtn) {
             summaryBtn.classList.add("active");
           }
+          
+          // プルダウンを「来場者状況」に設定
           document.getElementById("subTabSelect").value = "summary";
+          
+          // ページタイトルを維持（サブタブでタイトルが消えないよう確認）
+          // document.title は変更しない
         }
         
         // 来場者内訳を表示
@@ -883,17 +1490,21 @@
       const summaryDiv = document.getElementById("summary-table-area");
       summaryDiv.innerHTML = "";
 
+      // タイトルを保持 - これを追加
+      const title = document.getElementById("page-title").textContent || "受付確認システム";
+      document.title = title;
+
       showRefreshNotice(true);
 
       try {
         const res = await fetch("/summary-data");
         if (!res.ok) {
-          summaryDiv.innerHTML = '<div class="empty-message"><i class="fas fa-exclamation-circle"></i> 来場者内訳取得エラー</div>';
+          summaryDiv.innerHTML = '<div class="empty-message"><i class="fas fa-exclamation-circle"></i> 只今サーバーが混在しております。しばらく経ってから、ページを再読み込みしてください。<br><button class="retry-button" onclick="showSummaryTable()">再試行</button></div>';
           return;
         }
         const tableData = await res.json();
         if (tableData.length === 0) {
-          summaryDiv.innerHTML = '<div class="empty-message"><i class="fas fa-info-circle"></i> 来場者内訳がありません</div>';
+          summaryDiv.innerHTML = '<div class="empty-message"><i class="fas fa-info-circle"></i> 来場者内訳のデータがありません。しばらく経ってから再度確認してください。<br><button class="retry-button" onclick="showSummaryTable()">再試行</button></div>';
           return;
         }
 
@@ -951,7 +1562,7 @@
         summaryDiv.innerHTML = html;
       } catch (error) {
         console.error("[showSummaryTable] error", error);
-        summaryDiv.innerHTML = '<div class="empty-message"><i class="fas fa-exclamation-circle"></i> データ取得中にエラーが発生しました</div>';
+        summaryDiv.innerHTML = '<div class="empty-message"><i class="fas fa-exclamation-circle"></i> 通信エラーが発生しました。ネットワーク接続を確認して、再度お試しください。<br><button class="retry-button" onclick="showSummaryTable()">再試行</button></div>';
       } finally {
         showRefreshNotice(false);
       }
@@ -1037,7 +1648,7 @@
 
       const data = allData[sheetName] || [];
       if (data.length === 0) {
-        container.innerHTML = '<div class="empty-message"><i class="fas fa-info-circle"></i> 該当データがありません。</div>';
+        container.innerHTML = '<div class="empty-message"><i class="fas fa-info-circle"></i> 表示できるデータがありません。しばらく経ってから再度お試しください。<br><button class="retry-button" onclick="location.reload()">再試行</button></div>';
         return;
       }
 
