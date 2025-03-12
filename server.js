@@ -24,7 +24,8 @@ const EXCLUDED_SHEETS = [
   "リーダー",
   "NPKK営業所分類",
   "来場数内訳_NPKK",
-  "履歴"
+  "履歴",
+  "抜粋"
 ];
 
 const app = express();
