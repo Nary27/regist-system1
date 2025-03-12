@@ -529,15 +529,29 @@
         setActiveMainTab("メニュー");
       }
       
-      if (savedSubTab && allSheetNames.includes(savedSubTab)) {
+      // モバイル表示でメニュータブの場合は来場者状況を優先
+      if (window.innerWidth <= 768 && currentMainTab === "メニュー") {
+        document.getElementById("subTabSelect").value = "summary";
+        document.querySelectorAll(".sub-tab-button").forEach(btn => {
+          if (btn.textContent === "来場者状況") {
+            btn.classList.add("active");
+          }
+        });
+        showSummaryTable();
+      } else if (savedSubTab && allSheetNames.includes(savedSubTab)) {
         setActiveSubTab(savedSubTab);
       }
+
+      // ウィンドウサイズ変更時の処理
+      window.addEventListener("resize", handleResize);
 
       // 30秒ポーリング
       setInterval(async () => {
         showRefreshNotice(true);
         await fetchAllData();
-        if (currentMainTab === "メニュー" && !currentSubTab) {
+        if (currentMainTab === "メニュー" && 
+           (!currentSubTab || 
+           (window.innerWidth <= 768 && document.getElementById("subTabSelect").value === "summary"))) {
           showSummaryTable(); // メニュー時→来場者内訳
         } else if (currentSubTab) {
           renderSheetTable(currentSubTab);
@@ -545,6 +559,14 @@
         showRefreshNotice(false);
       }, 30000);
     });
+    
+    // ウィンドウサイズ変更時の処理
+    function handleResize() {
+      // モバイルとPC表示の切り替え時に必要な処理
+      if (currentMainTab === "メニュー") {
+        renderSubTabs("メニュー");
+      }
+    }
 
     // データ更新通知表示
     function showRefreshNotice(show) {
@@ -618,6 +640,35 @@
       
       switch(mainTabName) {
         case "メニュー":
+          // モバイル表示の場合
+          if (window.innerWidth <= 768) {
+            // モバイル表示では「来場者状況」タブを追加
+            const summaryBtn = document.createElement("div");
+            summaryBtn.classList.add("sub-tab-button");
+            summaryBtn.textContent = "来場者状況";
+            summaryBtn.addEventListener("click", () => {
+              // 全サブタブの選択解除
+              document.querySelectorAll(".sub-tab-button").forEach(b => b.classList.remove("active"));
+              // このタブをアクティブに
+              summaryBtn.classList.add("active");
+              currentSubTab = "";
+              document.getElementById("table-container").innerHTML = "";
+              showSummaryTable();
+            });
+            subTabsContainer.appendChild(summaryBtn);
+            
+            // モバイル用プルダウンにも追加
+            const summaryOpt = document.createElement("option");
+            summaryOpt.value = "summary";
+            summaryOpt.textContent = "来場者状況";
+            subTabSelect.appendChild(summaryOpt);
+            
+            // 初期状態で来場者状況タブを選択状態に
+            if (!currentSubTab) {
+              summaryBtn.classList.add("active");
+              document.getElementById("subTabSelect").value = "summary";
+            }
+          }
           filteredSheets = [...allSheetNames];
           break;
         case "全体（あいうえお順）":
@@ -673,7 +724,16 @@
       
       // モバイルプルダウンのイベント
       subTabSelect.addEventListener("change", (e) => {
-        if (e.target.value) {
+        if (e.target.value === "summary") {
+          // 来場者状況を表示
+          resetSubTab();
+          document.querySelectorAll(".sub-tab-button").forEach(btn => {
+            if (btn.textContent === "来場者状況") {
+              btn.classList.add("active");
+            }
+          });
+          showSummaryTable();
+        } else if (e.target.value) {
           setActiveSubTab(e.target.value);
         } else {
           // 空選択の場合はメインタブの表示に戻る
@@ -704,8 +764,17 @@
       // メインタブ切り替え時にはサブタブをリセット
       resetSubTab();
       
-      // メニューの場合は来場者内訳を表示
+      // メニューの場合
       if (tabName === "メニュー") {
+        // モバイル表示の場合は、サブタブの「来場者状況」をアクティブに
+        if (window.innerWidth <= 768) {
+          document.querySelectorAll(".sub-tab-button").forEach(btn => {
+            if (btn.textContent === "来場者状況") {
+              btn.classList.add("active");
+            }
+          });
+          document.getElementById("subTabSelect").value = "summary";
+        }
         showSummaryTable();
       } else {
         document.getElementById("summary-table-area").innerHTML = "";
