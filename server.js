@@ -13,7 +13,7 @@ const WebSocket = require("ws");
 const PORT = process.env.PORT || 3000;
 
 // 2) スプレッドシート設定
-const SPREADSHEET_ID = "1hMKTxFPIliPWGDt4auIbRq8wGJYCu_-0DKXujqvV4gw";
+const SPREADSHEET_ID = "1VzLZaq2kiGzB4QXtlvsDiF9G_h7hENyCb0_rg1lxaJE";
 const API_KEY = "AIzaSyCJMJHHiar0P2e6jdWm0HJdGldAaE3b05I";
 
 // 除外シート
