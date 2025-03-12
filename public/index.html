@@ -1165,7 +1165,8 @@
         { key: "region", header: "地域区分", width: "140px" }
       ];
 
-      // 空の列を非表示にlet visibleCols = filterEmptyColumns(data, columns);
+      // 空の列を非表示に
+      let visibleCols = filterEmptyColumns(data, columns);
       
 
       const table = document.createElement("table");
