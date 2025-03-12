@@ -133,9 +133,11 @@ async function getMultipleSheetsData(sheetNames) {
   }
 }
 
+// ★ 修正箇所 ★
+// getSummaryData の取得範囲をA1:E16に変更し、フィルタ処理を削除して各セルのtrimのみを行う
 async function getSummaryData() {
   const sheets = google.sheets({ version: "v4" });
-  const range = `'来場数内訳'!A1:E16`;
+  const range = `'来場数内訳'!A1:E16`;  // 変更：16行目まで取得
   try {
     const resp = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
@@ -143,9 +145,8 @@ async function getSummaryData() {
       key: API_KEY
     });
     let tableData = resp.data.values || [];
-    tableData = tableData
-      .map(rowArr => rowArr.filter(cell => cell && cell.trim()))
-      .filter(r => r.length>0);
+    // 変更：フィルタ処理ではなく、各セルのtrimのみを実施
+    tableData = tableData.map(row => row.map(cell => cell.trim()));
     return tableData;
   } catch (err) {
     console.error("[getSummaryData] error:", err.message);
