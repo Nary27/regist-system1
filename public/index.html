@@ -851,47 +851,48 @@
       });
     }
     
-    // メインタブをアクティブに
     function setActiveMainTab(tabName) {
-      currentMainTab = tabName;
-      localStorage.setItem("activeMainTab", tabName);
-      
-      // メインタブのハイライト
-      document.querySelectorAll(".main-tab-button").forEach(btn => {
-        btn.classList.remove("active");
-        if (btn.textContent === tabName) {
-          btn.classList.add("active");
-        }
-      });
-      
-      // モバイルプルダウンも同期
-      document.getElementById("mainTabSelect").value = tabName;
-      
-      // サブタブ再生成
-      renderSubTabs(tabName);
-      
-      // メインタブ切り替え時にはサブタブをリセット
-      resetSubTab();
-      
-      // メニューの場合
-      if (tabName === "メニュー") {
-        const isMobile = window.innerWidth <= 768;
-        
-        if (isMobile) {
-          const summaryBtn = document.querySelector(".sub-tab-button[data-special='summary']");
-          if (summaryBtn) {
-            summaryBtn.classList.add("active");
-            document.getElementById("subTabSelect").value = "summary";
-          }
-          const title = document.getElementById("page-title").textContent || "受付確認システム";
-          document.title = title;
-        }
-        showSummaryTable();
-      } else {
-        // メニュー以外では来場者内訳を消す
-        document.getElementById("summary-table-area").innerHTML = "";
-      }
+  currentMainTab = tabName;
+  localStorage.setItem("activeMainTab", tabName);
+  
+  // メインタブのハイライト
+  document.querySelectorAll(".main-tab-button").forEach(btn => {
+    btn.classList.remove("active");
+    if (btn.textContent === tabName) {
+      btn.classList.add("active");
     }
+  });
+  
+  // モバイル用セレクトも同期
+  document.getElementById("mainTabSelect").value = tabName;
+  
+  // サブタブ再生成
+  renderSubTabs(tabName);
+  
+  // もし保存されたサブタブ情報がなければサブタブをリセット（ユーザーがメインタブを変更した場合）
+  if (!localStorage.getItem("activeSubTab")) {
+    resetSubTab();
+  }
+  
+  // メニューの場合の処理
+  if (tabName === "メニュー") {
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+      const summaryBtn = document.querySelector(".sub-tab-button[data-special='summary']");
+      if (summaryBtn) {
+        summaryBtn.classList.add("active");
+        document.getElementById("subTabSelect").value = "summary";
+      }
+      const title = document.getElementById("page-title").textContent || "受付確認システム";
+      document.title = title;
+    }
+    showSummaryTable();
+  } else {
+    // メニュー以外の場合は来場者内訳表示をクリア
+    document.getElementById("summary-table-area").innerHTML = "";
+  }
+}
+
     
     // サブタブをアクティブに
     function setActiveSubTab(tabName) {
