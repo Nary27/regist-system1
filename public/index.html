@@ -715,12 +715,6 @@
       const subTabsContainer = document.getElementById("sub-tabs");
       const subTabSelect = document.getElementById("subTabSelect");
       
-      // 以前のイベントリスナーを削除するために新しい要素で置き換え
-      const newSubTabSelect = document.createElement("select");
-      newSubTabSelect.id = "subTabSelect";
-      subTabSelect.parentNode.replaceChild(newSubTabSelect, subTabSelect);
-      subTabSelect = newSubTabSelect;
-      
       subTabsContainer.innerHTML = "";
       subTabSelect.innerHTML = "";
       
@@ -854,8 +848,6 @@
           });
           
           // タイトル表示を維持（ページタイトルを変更しない）
-          const title = document.getElementById("page-title").textContent || "受付確認システム";
-          document.title = title;
           
           // 来場者内訳を表示
           document.getElementById("table-container").innerHTML = "";
@@ -945,21 +937,13 @@
       currentSubTab = "";
       localStorage.removeItem("activeSubTab");
       
-      // 修正: 特別なタブ（来場者状況）は保持する
       document.querySelectorAll(".sub-tab-button").forEach(btn => {
         if (!btn.dataset.special) {
           btn.classList.remove("active");
         }
       });
       
-      // メニュータブかつモバイル表示なら来場者状況を選択状態に
-      const isMobile = window.innerWidth <= 768;
-      if (isMobile && currentMainTab === "メニュー") {
-        document.getElementById("subTabSelect").value = "summary";
-      } else {
-        document.getElementById("subTabSelect").value = "";
-      }
-      
+      document.getElementById("subTabSelect").value = "";
       document.getElementById("table-container").innerHTML = "";
     }
 
@@ -986,11 +970,8 @@
       }
       
       // モバイル表示ではサブタブの表示/非表示を切り替え
-      const subSelectContainer = document.querySelector(".select-container.sub-select");
-      if (subSelectContainer) {
-        subSelectContainer.style.display = 
-          isMobile && document.getElementById("sub-tabs").style.display !== "none" ? "block" : "none";
-      }
+      document.querySelector(".select-container.sub-select").style.display = 
+        isMobile && document.getElementById("sub-tabs").style.display !== "none" ? "block" : "none";
     }
 
     // 来場者内訳 (メニュー時に表示)
@@ -998,7 +979,7 @@
       const summaryDiv = document.getElementById("summary-table-area");
       summaryDiv.innerHTML = "";
 
-      // タイトルを保持
+      // タイトルを保持 - これを追加
       const title = document.getElementById("page-title").textContent || "受付確認システム";
       document.title = title;
 
