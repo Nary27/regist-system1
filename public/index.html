@@ -21,13 +21,7 @@
       --radius: 8px;
       --transition: all 0.3s ease;
     }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Helvetica Neue', Arial, sans-serif;
       background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -36,13 +30,7 @@
       padding-bottom: 2rem;
       user-select: none;
     }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 1rem;
-    }
-
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
     header {
       background-color: var(--primary);
       color: white;
@@ -50,7 +38,6 @@
       box-shadow: var(--shadow);
       margin-bottom: 2rem;
     }
-
     h1 {
       font-size: 2rem;
       text-align: center;
@@ -61,7 +48,6 @@
       left: 50%;
       transform: translateX(-50%);
     }
-
     h1::after {
       content: '';
       position: absolute;
@@ -73,7 +59,6 @@
       transform: translateX(-50%);
       border-radius: 2px;
     }
-
     .card {
       background: white;
       border-radius: var(--radius);
@@ -81,8 +66,7 @@
       overflow: hidden;
       margin-bottom: 2rem;
     }
-
-    /* メインタブ行 (1段目) */
+    /* メインタブ行 */
     .main-tabs {
       display: flex;
       gap: 0.5rem;
@@ -93,7 +77,6 @@
       background-color: var(--light);
       border-bottom: 1px solid rgba(0,0,0,0.1);
     }
-
     .main-tab-button {
       padding: 0.8rem 1.2rem;
       background: white;
@@ -106,20 +89,17 @@
       transition: var(--transition);
       color: var(--dark);
     }
-
     .main-tab-button:hover {
       background: rgba(255,255,255,0.9);
       transform: translateY(-2px);
     }
-
     .main-tab-button.active {
       background: var(--accent);
       color: white;
       transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+      box-shadow: 0 4px 8px rgba(52,152,219,0.3);
     }
-
-    /* サブタブ行 (2段目) */
+    /* サブタブ行 */
     .sub-tabs {
       display: flex;
       gap: 0.5rem;
@@ -129,7 +109,6 @@
       padding: 0.75rem 1rem;
       background-color: rgba(255,255,255,0.8);
     }
-
     .sub-tab-button {
       padding: 0.6rem 1rem;
       background: var(--light);
@@ -143,19 +122,16 @@
       transition: var(--transition);
       color: var(--dark);
     }
-
     .sub-tab-button:hover {
       background: var(--light);
       transform: translateY(-1px);
     }
-
     .sub-tab-button.active {
       background: var(--primary-light);
       color: white;
       transform: translateY(-1px);
-      box-shadow: 0 2px 4px rgba(52, 73, 94, 0.3);
+      box-shadow: 0 2px 4px rgba(52,73,94,0.3);
     }
-
     /* モバイル用プルダウン */
     .select-container {
       position: relative;
@@ -164,15 +140,8 @@
       margin-bottom: 1rem;
       display: none;
     }
-
-    .select-container.main-select {
-      margin-top: 1.5rem;
-    }
-
-    .select-container.sub-select {
-      margin-top: 0.5rem;
-    }
-
+    .select-container.main-select { margin-top: 1.5rem; }
+    .select-container.sub-select { margin-top: 0.5rem; }
     select {
       width: 100%;
       padding: 0.8rem 1rem;
@@ -185,12 +154,10 @@
       outline: none;
       transition: var(--transition);
     }
-
     select:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25);
+      box-shadow: 0 0 0 3px rgba(52,152,219,0.25);
     }
-
     .select-arrow {
       position: absolute;
       right: 12px;
@@ -199,15 +166,13 @@
       pointer-events: none;
       color: var(--gray);
     }
-
-    /* メインテーブル */
+    /* テーブル表示 */
     .table-container {
       width: 100%;
       margin: 0 auto;
       overflow-x: auto;
       padding: 0 1rem;
     }
-
     table {
       width: 100%;
       min-width: 1520px;
@@ -218,7 +183,6 @@
       overflow: hidden;
       box-shadow: var(--shadow);
     }
-
     th {
       background-color: var(--primary);
       color: white;
@@ -228,49 +192,23 @@
       position: sticky;
       top: 0;
     }
-
     td {
       padding: 1rem;
       text-align: center;
       border-bottom: 1px solid rgba(0,0,0,0.05);
     }
-
-    /* カラム特定スタイル */
-    td.facility-cell {
-      text-align: left;
-    }
-
+    td.facility-cell { text-align: left; }
     td.time-cell {
       font-size: 0.9rem;
       white-space: nowrap;
     }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    tbody tr {
-      transition: var(--transition);
-    }
-
-    .status-coming {
-      background-color: rgba(241, 196, 15, 0.15);
-    }
-    
-    .status-leaving {
-      background-color: rgba(52, 152, 219, 0.15);
-    }
-    
-    .status-not-arrived {
-      background-color: white;
-    }
-    
-    .status-cancelled {
-      background-color: rgba(52, 73, 94, 0.15);
-      color: #444;
-    }
-
-    /* Status Badges */
+    tr:last-child td { border-bottom: none; }
+    tbody tr { transition: var(--transition); }
+    .status-coming { background-color: rgba(241,196,15,0.15); }
+    .status-leaving { background-color: rgba(52,152,219,0.15); }
+    .status-not-arrived { background-color: white; }
+    .status-cancelled { background-color: rgba(52,73,94,0.15); color: #444; }
+    /* ステータスバッジ */
     .status-badge {
       display: inline-block;
       padding: 0.4rem 0.8rem;
@@ -279,34 +217,16 @@
       font-size: 0.85rem;
       white-space: nowrap;
     }
-
-    .badge-coming {
-      background-color: var(--warning);
-      color: var(--dark);
-    }
-
-    .badge-leaving {
-      background-color: var(--accent);
-      color: white;
-    }
-
-    .badge-not-arrived {
-      background-color: var(--gray);
-      color: white;
-    }
-
-    .badge-cancelled {
-      background-color: #4a5568;
-      color: white;
-    }
-
+    .badge-coming { background-color: var(--warning); color: var(--dark); }
+    .badge-leaving { background-color: var(--accent); color: white; }
+    .badge-not-arrived { background-color: var(--gray); color: white; }
+    .badge-cancelled { background-color: #4a5568; color: white; }
     /* 来場者内訳テーブル */
     .summary-container {
       display: flex;
       justify-content: center;
       padding: 0 1rem;
     }
-
     .summary-table {
       border-collapse: separate;
       border-spacing: 0;
@@ -319,14 +239,12 @@
       box-shadow: var(--shadow);
       width: 100%;
     }
-
     .summary-table th {
       background-color: var(--primary-light);
       color: white;
       padding: 0.8rem;
       text-align: center;
     }
-
     .summary-table td {
       border: none;
       padding: 0.8rem;
@@ -334,17 +252,14 @@
       font-size: 1.1rem;
       border-bottom: 1px solid rgba(0,0,0,0.05);
     }
-    
     .summary-table td:first-child {
       font-weight: 500;
       text-align: left;
       padding-left: 1.5rem;
     }
-
     .summary-table tr:nth-child(odd) {
       background-color: rgba(0,0,0,0.02);
     }
-
     .refreshing {
       position: fixed;
       top: 1rem;
@@ -361,11 +276,7 @@
       transition: opacity 0.3s;
       z-index: 100;
     }
-
-    .refreshing.visible {
-      opacity: 1;
-    }
-
+    .refreshing.visible { opacity: 1; }
     .spinner {
       display: inline-block;
       width: 12px;
@@ -375,18 +286,13 @@
       border-top-color: white;
       animation: spin 1s linear infinite;
     }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
+    @keyframes spin { to { transform: rotate(360deg); } }
     .empty-message {
       text-align: center;
       padding: 3rem;
       color: var(--gray);
       font-style: italic;
     }
-    
     .retry-button {
       display: inline-block;
       margin-top: 1rem;
@@ -399,69 +305,27 @@
       transition: var(--transition);
       font-size: 0.9rem;
     }
-    
-    .retry-button:hover {
-      background-color: var(--accent-light);
-    }
-    
+    .retry-button:hover { background-color: var(--accent-light); }
     .error-container {
-      background-color: rgba(231, 76, 60, 0.1);
+      background-color: rgba(231,76,60,0.1);
       border-left: 4px solid var(--danger);
       padding: 1rem;
       margin: 1rem 0;
       border-radius: var(--radius);
     }
-    
-    .error-title {
-      color: var(--danger);
-      font-weight: bold;
-      margin-bottom: 0.5rem;
-    }
-    
-    .error-message {
-      color: var(--dark);
-      margin-bottom: 0.5rem;
-    }
-
+    .error-title { color: var(--danger); font-weight: bold; margin-bottom: 0.5rem; }
+    .error-message { color: var(--dark); margin-bottom: 0.5rem; }
     @media (max-width: 768px) {
-      /* 幅768px以下 → PCタブを隠し、プルダウン表示 */
-      .main-tabs, .sub-tabs {
-        display: none !important;
-      }
-      
-      .select-container {
-        display: block !important;
-      }
-
-      table {
-        min-width: 900px; /* モバイルのテーブル幅を調整 */
-      }
-      
-      th, td {
-        font-size: 0.9rem;
-        padding: 0.5rem;
-      }
-      
-      h1 {
-        font-size: 1.5rem;
-      }
-
-      .status-badge {
-        padding: 0.3rem 0.6rem;
-        font-size: 0.7rem;
-      }
-      
-      td.time-cell {
-        font-size: 0.8rem;
-        line-height: 1.2;
-      }
+      .main-tabs, .sub-tabs { display: none !important; }
+      .select-container { display: block !important; }
+      table { min-width: 900px; }
+      th, td { font-size: 0.9rem; padding: 0.5rem; }
+      h1 { font-size: 1.5rem; }
+      .status-badge { padding: 0.3rem 0.6rem; font-size: 0.7rem; }
+      td.time-cell { font-size: 0.8rem; line-height: 1.2; }
     }
-
     @media (max-width: 480px) {
-      th, td {
-        font-size: 0.8rem;
-        padding: 0.4rem;
-      }
+      th, td { font-size: 0.8rem; padding: 0.4rem; }
     }
   </style>
 </head>
@@ -470,18 +334,15 @@
     <div class="spinner"></div>
     <span>データ更新中...</span>
   </div>
-
   <header>
     <div class="container">
       <h1 id="page-title">読み込み中...</h1>
     </div>
   </header>
-
   <div class="container">
     <div class="card">
       <!-- メインタブ (PCタブ) -->
       <div class="main-tabs" id="main-tabs"></div>
-      
       <!-- メインタブ (モバイルプルダウン) -->
       <div class="select-container main-select">
         <select id="mainTabSelect"></select>
@@ -489,10 +350,8 @@
           <i class="fas fa-chevron-down"></i>
         </div>
       </div>
-
       <!-- サブタブ (PCタブ) -->
       <div class="sub-tabs" id="sub-tabs"></div>
-      
       <!-- サブタブ (モバイルプルダウン) -->
       <div class="select-container sub-select">
         <select id="subTabSelect"></select>
@@ -501,72 +360,59 @@
         </div>
       </div>
     </div>
-
     <!-- テーブル表示領域 -->
     <div class="card">
       <div class="table-container" id="table-container"></div>
     </div>
-
-    <!-- メニュー(来場者内訳) 表示領域 -->
+    <!-- 来場者内訳表示領域 -->
     <div class="summary-container">
       <div id="summary-table-area"></div>
     </div>
   </div>
-
   <script>
     // グローバル変数
-    let allSheetNames = [];              // シート全体
-    let allData = {};                    // 全データ
-    let mainTabList = ["メニュー", "全体（あいうえお順）", "全体（エリア順）", "NPKK", "OPC"]; // メインタブ
-    let currentMainTab = "メニュー";      // 現在のメインタブ
-    let currentSubTab = "";              // 現在のサブタブ
-    let isRefreshing = false;            // データ更新中フラグ
+    let allSheetNames = [];
+    let allData = {};
+    let mainTabList = ["メニュー", "全体（あいうえお順）", "全体（エリア順）", "NPKK", "OPC"];
+    let currentMainTab = "メニュー";
+    let currentSubTab = "";
+    let isRefreshing = false;
 
-    // 初期化処理（データ取得とエラーハンドリング）
     async function initializeApp() {
       try {
-        // 1) /info でシート一覧取得
         showRefreshNotice(true);
         const infoRes = await fetch("/info");
         if (!infoRes.ok) {
-          document.getElementById("table-container").innerHTML = 
+          document.getElementById("table-container").innerHTML =
             '<div class="empty-message"><i class="fas fa-exclamation-circle"></i> 只今サーバーが混在しております。しばらく経ってから、ページを再読み込みしてください。<br><button class="retry-button" onclick="location.reload()">ページを再読み込み</button></div>';
           return false;
         }
-        
         const info = await infoRes.json();
         document.getElementById("page-title").textContent = info.title || "受付確認システム";
         document.title = info.title || "受付確認システム";
-        
-        // シート名一覧を取得
         allSheetNames = info.sheetNames || [];
         if (allSheetNames.length === 0) {
-          document.getElementById("table-container").innerHTML = 
+          document.getElementById("table-container").innerHTML =
             '<div class="empty-message"><i class="fas fa-info-circle"></i> 表示できるデータがありません。しばらく経ってから再度お試しください。<br><button class="retry-button" onclick="location.reload()">再試行</button></div>';
           return false;
         }
-        
-        // 2) /batch-data でデータ取得
         const dataRes = await fetch("/batch-data");
         if (!dataRes.ok) {
-          document.getElementById("table-container").innerHTML = 
+          document.getElementById("table-container").innerHTML =
             '<div class="empty-message"><i class="fas fa-exclamation-circle"></i> 只今サーバーが混在しております。しばらく経ってから、ページを再読み込みしてください。<br><button class="retry-button" onclick="location.reload()">ページを再読み込み</button></div>';
           return false;
         }
-        
         allData = await dataRes.json();
-        
         if (Object.keys(allData).length === 0) {
-          document.getElementById("table-container").innerHTML = 
+          document.getElementById("table-container").innerHTML =
             '<div class="empty-message"><i class="fas fa-info-circle"></i> 表示できるデータがありません。しばらく経ってから再度お試しください。<br><button class="retry-button" onclick="location.reload()">再試行</button></div>';
           return false;
         }
-        
         showRefreshNotice(false);
         return true;
       } catch (error) {
         console.error("初期化エラー:", error);
-        document.getElementById("table-container").innerHTML = 
+        document.getElementById("table-container").innerHTML =
           '<div class="empty-message"><i class="fas fa-exclamation-circle"></i> 通信エラーが発生しました。ネットワーク接続を確認して、再度お試しください。<br><button class="retry-button" onclick="location.reload()">再試行</button></div>';
         showRefreshNotice(false);
         return false;
@@ -574,61 +420,36 @@
     }
 
     window.addEventListener("DOMContentLoaded", async () => {
-      // アプリ初期化（データ取得）
       const initialized = await initializeApp();
-      if (!initialized) {
-        return; // 初期化に失敗した場合は処理を中断
-      }
-
-      // タブ生成 (PC・モバイル両方)
+      if (!initialized) return;
       renderMainTabs();
-      
-      // 保存されたタブ状態を復元
+      // 復元：localStorage から保存されたタブ情報を読み出す
       const savedMainTab = localStorage.getItem("activeMainTab");
       const savedSubTab = localStorage.getItem("activeSubTab");
       const isMobile = window.innerWidth <= 768;
-      
       if (savedMainTab && mainTabList.includes(savedMainTab)) {
         setActiveMainTab(savedMainTab);
       } else {
         setActiveMainTab("メニュー");
       }
-      
-      // モバイル表示でメニュータブの場合は来場者状況を優先
       if (isMobile && currentMainTab === "メニュー") {
-        // メニュータブではサブタブを「来場者状況」にする
         document.getElementById("subTabSelect").value = "summary";
-        
         const summaryBtn = document.querySelector(".sub-tab-button[data-special='summary']");
-        if (summaryBtn) {
-          summaryBtn.classList.add("active");
-        }
-        
-        // タイトル表示を維持
+        if (summaryBtn) summaryBtn.classList.add("active");
         const title = document.getElementById("page-title").textContent || "受付確認システム";
         document.title = title;
-        
         showSummaryTable();
       } else if (savedSubTab && allSheetNames.includes(savedSubTab)) {
-        // そうでなければ保存されていたサブタブを復元
         setActiveSubTab(savedSubTab);
       }
-
-      // ウィンドウサイズ変更時の処理
       window.addEventListener("resize", handleResize);
-
-      // 30秒ポーリング
       setInterval(async () => {
         const success = await fetchAllData();
         if (success) {
           const isMobileNow = window.innerWidth <= 768;
-          const isSummaryActive = isMobileNow && 
-                                 currentMainTab === "メニュー" && 
-                                 document.getElementById("subTabSelect").value === "summary";
-          
-          // 「メニュー」かつサブタブが何も選ばれていない or summary の場合は来場者内訳を更新
+          const isSummaryActive = isMobileNow && currentMainTab === "メニュー" && document.getElementById("subTabSelect").value === "summary";
           if (currentMainTab === "メニュー" && (!currentSubTab || isSummaryActive)) {
-            showSummaryTable(); 
+            showSummaryTable();
           } else if (currentSubTab) {
             renderSheetTable(currentSubTab);
           }
@@ -636,11 +457,9 @@
       }, 30000);
     });
 
-    // データ更新通知表示
     function showRefreshNotice(show) {
       const notice = document.getElementById("refreshNotice");
       isRefreshing = show;
-      
       if (show) {
         notice.classList.add("visible");
       } else {
@@ -648,125 +467,82 @@
       }
     }
 
-    // batch-data取得（更新時のエラーハンドリング含む）
     async function fetchAllData() {
       showRefreshNotice(true);
       try {
         const res = await fetch("/batch-data");
         if (!res.ok) {
           console.error("[fetchAllData] error", res.status);
-          // エラー表示（現在の表示は維持）
           const errorNotice = document.createElement("div");
           errorNotice.className = "empty-message";
           errorNotice.innerHTML = '<i class="fas fa-exclamation-triangle"></i> データの更新に失敗しました。自動的に再試行します...';
-          
-          // 一時的に表示して数秒後に消える
           document.getElementById("table-container").appendChild(errorNotice);
-          setTimeout(() => {
-            if (errorNotice.parentNode) {
-              errorNotice.parentNode.removeChild(errorNotice);
-            }
-          }, 5000);
-          
+          setTimeout(() => { if (errorNotice.parentNode) { errorNotice.parentNode.removeChild(errorNotice); } }, 5000);
           return false;
         }
         allData = await res.json();
         return true;
       } catch (error) {
         console.error("[fetchAllData] fetch error", error);
-        // エラー表示（サイレント）
         return false;
       } finally {
         showRefreshNotice(false);
       }
     }
 
-    // メインタブ生成 (PC・モバイル)
     function renderMainTabs() {
       const mainTabsContainer = document.getElementById("main-tabs");
       const mainTabSelect = document.getElementById("mainTabSelect");
-      
       mainTabsContainer.innerHTML = "";
       mainTabSelect.innerHTML = "";
-      
-      // メインタブ生成
       mainTabList.forEach(tabName => {
-        // PC用タブボタン
         const btn = document.createElement("div");
         btn.classList.add("main-tab-button");
         btn.textContent = tabName;
         btn.addEventListener("click", () => setActiveMainTab(tabName));
         mainTabsContainer.appendChild(btn);
-        
-        // モバイル用プルダウン
         const opt = document.createElement("option");
         opt.value = tabName;
         opt.textContent = tabName;
         mainTabSelect.appendChild(opt);
       });
-      
-      // モバイルプルダウンのイベント
-      mainTabSelect.addEventListener("change", (e) => {
-        setActiveMainTab(e.target.value);
-      });
+      mainTabSelect.addEventListener("change", (e) => { setActiveMainTab(e.target.value); });
     }
-    
-    // サブタブ生成
+
     function renderSubTabs(mainTabName) {
       const subTabsContainer = document.getElementById("sub-tabs");
       const subTabSelect = document.getElementById("subTabSelect");
-      
       subTabsContainer.innerHTML = "";
       subTabSelect.innerHTML = "";
-      
-      // メインタブに応じたサブタブをフィルタリング
       let filteredSheets = [];
       const isMobile = window.innerWidth <= 768;
-      
       switch(mainTabName) {
         case "メニュー":
-          // 「来場者状況」タブ（summary）を最初に追加（モバイル用）
           if (isMobile) {
             const summaryBtn = document.createElement("div");
             summaryBtn.classList.add("sub-tab-button");
             summaryBtn.dataset.special = "summary";
             summaryBtn.textContent = "来場者状況";
             summaryBtn.addEventListener("click", () => {
-              // ---- 修正ポイント ----
-              // resetSubTab() を呼ばず、サブタブ一覧は消さない
-              // 代わりにすべての active を外して summaryBtn だけ active に
-              document.querySelectorAll(".sub-tab-button").forEach(b => {
-                b.classList.remove("active");
-              });
+              document.querySelectorAll(".sub-tab-button").forEach(b => { b.classList.remove("active"); });
               summaryBtn.classList.add("active");
-
-              // モバイルセレクトも同期
               document.getElementById("subTabSelect").value = "summary";
-
-              // シートテーブルは消して、来場者内訳を表示
               document.getElementById("table-container").innerHTML = "";
               showSummaryTable();
             });
             subTabsContainer.appendChild(summaryBtn);
-
-            // モバイル用プルダウンにも「来場者状況」を追加
             const summaryOpt = document.createElement("option");
             summaryOpt.value = "summary";
             summaryOpt.textContent = "来場者状況";
             subTabSelect.appendChild(summaryOpt);
           }
-          // メニューは全シートを一覧に
           filteredSheets = [...allSheetNames];
           break;
         case "全体（あいうえお順）":
-          filteredSheets = allSheetNames.filter(name => 
-            name.includes("全体（あいうえお順）") || 
-            name.includes("全体(あいうえお順)"));
+          filteredSheets = allSheetNames.filter(name => name.includes("全体（あいうえお順）") || name.includes("全体(あいうえお順)"));
           break;
         case "全体（エリア順）":
-          filteredSheets = allSheetNames.filter(name => 
-            name.includes("全体（エリア順）") || 
-            name.includes("全体(エリア順)"));
+          filteredSheets = allSheetNames.filter(name => name.includes("全体（エリア順）") || name.includes("全体(エリア順)"));
           break;
         case "NPKK":
           filteredSheets = allSheetNames.filter(name => name.startsWith("N."));
@@ -775,199 +551,131 @@
           filteredSheets = allSheetNames.filter(name => name.startsWith("O."));
           break;
       }
-
-      // サブタブが無い場合は非表示
       if (filteredSheets.length === 0 && !(mainTabName === "メニュー" && isMobile)) {
         subTabsContainer.style.display = "none";
         document.querySelector(".select-container.sub-select").style.display = "none";
         return;
       }
-      
-      // サブタブを表示
       subTabsContainer.style.display = "flex";
       document.querySelector(".select-container.sub-select").style.display = isMobile ? "block" : "none";
-      
-      // シートごとのサブタブ生成
       filteredSheets.forEach(sheetName => {
         const btn = document.createElement("div");
         btn.classList.add("sub-tab-button");
         btn.textContent = sheetName;
         btn.addEventListener("click", () => setActiveSubTab(sheetName));
         subTabsContainer.appendChild(btn);
-
-        // モバイル用プルダウンにも追加
         const opt = document.createElement("option");
         opt.value = sheetName;
         opt.textContent = sheetName;
         subTabSelect.appendChild(opt);
       });
-      
-      // メニュー以外の場合は先頭に空選択肢を入れる
       if (mainTabName !== "メニュー" || !isMobile) {
         const defaultOpt = document.createElement("option");
         defaultOpt.value = "";
         defaultOpt.textContent = "-- シートを選択 --";
         subTabSelect.insertBefore(defaultOpt, subTabSelect.firstChild);
       }
-      
-      // 現在のサブタブを反映
       if (currentSubTab) {
-        // シートがアクティブな場合
         document.querySelectorAll(".sub-tab-button").forEach(btn => {
-          if (btn.textContent === currentSubTab) {
-            btn.classList.add("active");
-          }
+          if (btn.textContent === currentSubTab) btn.classList.add("active");
         });
         document.getElementById("subTabSelect").value = currentSubTab;
       } else if (mainTabName === "メニュー" && isMobile) {
-        // メニューかつモバイル → 「来場者状況」をデフォルトアクティブ
         const summaryBtn = document.querySelector(".sub-tab-button[data-special='summary']");
         if (summaryBtn) {
           summaryBtn.classList.add("active");
           document.getElementById("subTabSelect").value = "summary";
         }
       }
-
-      // モバイルプルダウンのイベント
       subTabSelect.addEventListener("change", (e) => {
         const selectedValue = e.target.value;
         if (selectedValue === "summary") {
-          // ---- 修正ポイント ----
-          // resetSubTab() せず、同様に active のみ切り替え
           document.querySelectorAll(".sub-tab-button").forEach(btn => {
             btn.classList.remove("active");
-            if (btn.dataset.special === "summary") {
-              btn.classList.add("active");
-            }
+            if (btn.dataset.special === "summary") btn.classList.add("active");
           });
           document.getElementById("table-container").innerHTML = "";
           showSummaryTable();
         } else if (selectedValue) {
           setActiveSubTab(selectedValue);
         } else {
-          // 空選択ならシート表示をやめる
           resetSubTab();
         }
       });
     }
-    
-    // メインタブをアクティブに
+
+    // 修正済み setActiveMainTab
     function setActiveMainTab(tabName) {
       currentMainTab = tabName;
       localStorage.setItem("activeMainTab", tabName);
-      
-      // メインタブのハイライト
       document.querySelectorAll(".main-tab-button").forEach(btn => {
         btn.classList.remove("active");
-        if (btn.textContent === tabName) {
-          btn.classList.add("active");
-        }
+        if (btn.textContent === tabName) btn.classList.add("active");
       });
-      
-      // モバイルプルダウンも同期
       document.getElementById("mainTabSelect").value = tabName;
-      
-      // サブタブ再生成
       renderSubTabs(tabName);
-      
-      // メインタブ切り替え時にはサブタブをリセット
-      resetSubTab();
-      
-      // メニューの場合
+      // 「メニュー」タブの場合、保存された activeSubTab がなければ「summary」をデフォルトに設定
       if (tabName === "メニュー") {
-        const isMobile = window.innerWidth <= 768;
-        
-        if (isMobile) {
-          const summaryBtn = document.querySelector(".sub-tab-button[data-special='summary']");
-          if (summaryBtn) {
-            summaryBtn.classList.add("active");
-            document.getElementById("subTabSelect").value = "summary";
+        if (!localStorage.getItem("activeSubTab")) {
+          setActiveSubTab("summary");
+        } else {
+          if (localStorage.getItem("activeSubTab") === "summary") {
+            showSummaryTable();
           }
-          const title = document.getElementById("page-title").textContent || "受付確認システム";
-          document.title = title;
         }
-        showSummaryTable();
       } else {
-        // メニュー以外では来場者内訳を消す
         document.getElementById("summary-table-area").innerHTML = "";
       }
     }
-    
-    // サブタブをアクティブに
+
     function setActiveSubTab(tabName) {
       currentSubTab = tabName;
       localStorage.setItem("activeSubTab", tabName);
-      
-      // すべてのサブタブボタンの active を外し、選んだボタンだけ active
       document.querySelectorAll(".sub-tab-button").forEach(btn => {
         btn.classList.remove("active");
-        if (btn.textContent === tabName) {
-          btn.classList.add("active");
-        }
+        if (btn.textContent === tabName) btn.classList.add("active");
       });
-      
-      // モバイルプルダウンも同期
       document.getElementById("subTabSelect").value = tabName;
-      
-      // 来場者内訳はクリア
       document.getElementById("summary-table-area").innerHTML = "";
-      
-      // シートデータを表示
-      renderSheetTable(tabName);
+      if (tabName === "summary") {
+        showSummaryTable();
+      } else {
+        renderSheetTable(tabName);
+      }
     }
-    
-    // サブタブリセット
+
     function resetSubTab() {
       currentSubTab = "";
       localStorage.removeItem("activeSubTab");
-      
-      // 特別タブ以外のアクティブを外す
-      document.querySelectorAll(".sub-tab-button").forEach(btn => {
-        if (!btn.dataset.special) {
-          btn.classList.remove("active");
-        }
-      });
+      document.querySelectorAll(".sub-tab-button").forEach(btn => { if (!btn.dataset.special) btn.classList.remove("active"); });
       document.getElementById("subTabSelect").value = "";
       document.getElementById("table-container").innerHTML = "";
     }
 
-    // ウィンドウサイズ変更時の処理
     function handleResize() {
       const isMobile = window.innerWidth <= 768;
-      
-      // モバイル→PC or PC→モバイル 切り替わり時にサブタブ再描画
       if (currentMainTab === "メニュー") {
         renderSubTabs("メニュー");
-        
-        // モバイルでサブタブ選択がない場合はsummaryをデフォルト選択
         if (isMobile && !currentSubTab) {
           const summaryBtn = document.querySelector(".sub-tab-button[data-special='summary']");
           if (summaryBtn) {
             summaryBtn.classList.add("active");
             document.getElementById("subTabSelect").value = "summary";
-
             const title = document.getElementById("page-title").textContent || "受付確認システム";
             document.title = title;
           }
         }
       }
-      
-      // モバイル表示時はサブタブ部分をプルダウン化
       document.querySelector(".select-container.sub-select").style.display =
         isMobile && document.getElementById("sub-tabs").style.display !== "none" ? "block" : "none";
     }
 
-    // 来場者内訳 (メニュー時に表示)
     async function showSummaryTable() {
       const summaryDiv = document.getElementById("summary-table-area");
       summaryDiv.innerHTML = "";
-
-      // タイトルを保持
       const title = document.getElementById("page-title").textContent || "受付確認システム";
       document.title = title;
-
       showRefreshNotice(true);
-
       try {
         const res = await fetch("/summary-data");
         if (!res.ok) {
@@ -979,24 +687,17 @@
           summaryDiv.innerHTML = '<div class="empty-message"><i class="fas fa-info-circle"></i> 来場者内訳のデータがありません。しばらく経ってから再度確認してください。<br><button class="retry-button" onclick="showSummaryTable()">再試行</button></div>';
           return;
         }
-
-        // 任意のセル読み込み例：B1, B2, B3... B14 など
-        // 以下は例として読み込んだセルを使っています（実際のセル対応は適宜変更）
-        let totalRegistered = tableData[0][1] || 0;  
-        let totalRegistered_NPKK = tableData[1][1] || 0;  
-        let totalRegistered_OPC = tableData[2][1] || 0;  
-        let totalVisitors = tableData[3][1] || 0;    
-        let totalVisitors_NPKK = tableData[4][1] || 0;    
-        let totalVisitors_OPC = tableData[5][1] || 0;    
-        let totalNewVisitors = tableData[6][1] || 0; 
-        let totalRemainingVisitors = tableData[8][1] || 0; 
-        let totalCancelled = tableData[9][1] || 0;   
-        let totalLeaving = tableData[13][1] || 0;    
-
-        // テーブルHTML生成
+        let totalRegistered         = tableData[0][1] || 0;
+        let totalRegistered_NPKK    = tableData[1][1] || 0;
+        let totalRegistered_OPC     = tableData[2][1] || 0;
+        let totalVisitors           = tableData[3][1] || 0;
+        let totalVisitors_NPKK      = tableData[4][1] || 0;
+        let totalVisitors_OPC       = tableData[5][1] || 0;
+        let totalNewVisitors        = tableData[6][1] || 0;
+        let totalRemainingVisitors  = tableData[8][1] || 0;
+        let totalCancelled          = tableData[9][1] || 0;
+        let totalLeaving            = tableData[13][1] || 0;
         let html = `<table class="summary-table"><tbody>`;
-        
-        // セクション1: 登録者・来場者
         html += `
           <tr>
             <th colspan="2">登録・来場状況</th>
@@ -1022,8 +723,6 @@
             <td>${totalRemainingVisitors}</td>
           </tr>
         `;
-        
-        // セクション2: その他
         html += `
           <tr>
             <th colspan="2">その他</th>
@@ -1037,8 +736,6 @@
             <td>${totalNewVisitors}</td>
           </tr>
         `;
-        
-        // セクション3: 退場数
         html += `
           <tr>
             <th colspan="2">退場状況</th>
@@ -1048,9 +745,7 @@
             <td>${totalLeaving}</td>
           </tr>
         `;
-        
         html += "</tbody></table>";
-
         summaryDiv.innerHTML = html;
       } catch (error) {
         console.error("[showSummaryTable] error", error);
@@ -1060,7 +755,6 @@
       }
     }
 
-    // データ再取得と現在のタブ再描画
     async function fetchAllDataAndRenderCurrent() {
       const success = await fetchAllData();
       if (success) {
@@ -1072,25 +766,16 @@
       }
     }
 
-    // 状態テキスト取得
     function getStatusText(row) {
       let st = "未入場";
-      if (row.arrival === "true" && row.departure === "false") {
-        st = "来場中";
-      } else if (row.departure === "true") {
-        st = "退場済み";
-      }
-      if (row.canceledByO) {
-        st = "キャンセル";
-      }
+      if (row.arrival === "true" && row.departure === "false") st = "来場中";
+      else if (row.departure === "true") st = "退場済み";
+      if (row.canceledByO) st = "キャンセル";
       return st;
     }
 
-    // 状態に応じたバッジHTML取得
     function getStatusBadge(status) {
-      let badgeClass = "";
-      let icon = "";
-      
+      let badgeClass = "", icon = "";
       switch (status) {
         case "来場中":
           badgeClass = "badge-coming";
@@ -1108,54 +793,20 @@
           badgeClass = "badge-not-arrived";
           icon = '<i class="fas fa-hourglass-half"></i> ';
       }
-      
       return `<span class="status-badge ${badgeClass}">${icon}${status}</span>`;
     }
 
-    // 全て空の列を除外
-    function filterEmptyColumns(data, columns) {
-      // 重要なカラムは常に表示
-      const essentialColumns = ["statusText", "drName", "facility"];
-      
-      return columns.filter(col => {
-        // 常に表示するカラム以外は、データ全体で一度も値が入っていない場合は非表示
-        if (essentialColumns.includes(col.key)) {
-          return true;
-        }
-        
-        let hasVal = false;
-        for (const r of data) {
-          const val = (r[col.key] || "").trim();
-          if (val !== "") {
-            hasVal = true;
-            break;
-          }
-        }
-        return hasVal;
-      });
-    }
-
-    // シートテーブル描画
     function renderSheetTable(sheetName) {
       const container = document.getElementById("table-container");
       container.innerHTML = "";
-
       const data = allData[sheetName] || [];
       if (data.length === 0) {
         container.innerHTML = '<div class="empty-message"><i class="fas fa-info-circle"></i> 表示できるデータがありません。しばらく経ってから再度お試しください。<br><button class="retry-button" onclick="location.reload()">再試行</button></div>';
         return;
       }
-
-      // 状態テキストを付与
-      data.forEach(r => {
-        if (!r.statusText) {
-          r.statusText = getStatusText(r);
-        }
-      });
-
-      // カラム定義
+      data.forEach(r => { if (!r.statusText) r.statusText = getStatusText(r); });
       const columns = [
-      { key: "statusText", header: "状態" },
+        { key: "statusText", header: "状態" },
         { key: "drName", header: "DR氏名", width: "150px" },
         { key: "furigana", header: "フリガナ", fontSize: "0.8rem", width: "150px" },
         { key: "facility", header: "施設名", className: "facility-cell", width: "225px" },
@@ -1164,13 +815,8 @@
         { key: "facilityLocation", header: "施設所在地", width: "120px" },
         { key: "region", header: "地域区分", width: "140px" }
       ];
-
-      // 空の列を非表示に
-      let visibleCols = columns;
-      
-
+      const visibleCols = columns;
       const table = document.createElement("table");
-
       const thead = document.createElement("thead");
       let thHtml = "<tr>";
       visibleCols.forEach(col => {
@@ -1179,29 +825,20 @@
       thHtml += "</tr>";
       thead.innerHTML = thHtml;
       table.appendChild(thead);
-
       const tbody = document.createElement("tbody");
       data.forEach(row => {
         let stClass = "status-not-arrived";
-        if (row.statusText === "来場中") {
-          stClass = "status-coming";
-        } else if (row.statusText === "退場済み") {
-          stClass = "status-leaving";
-        } else if (row.statusText === "キャンセル") {
-          stClass = "status-cancelled";
-        }
-
+        if (row.statusText === "来場中") stClass = "status-coming";
+        else if (row.statusText === "退場済み") stClass = "status-leaving";
+        else if (row.statusText === "キャンセル") stClass = "status-cancelled";
         const tr = document.createElement("tr");
         tr.classList.add(stClass);
-
         let tdHtml = "";
         visibleCols.forEach(col => {
           const val = (row[col.key] || "").trim();
-          if (col.key === "statusText") {
-            tdHtml += `<td>${getStatusBadge(val)}</td>`;
-          } else if (col.key === "furigana") {
-            tdHtml += `<td style="font-size:${col.fontSize || '1rem'}">${val}</td>`;
-          } else {
+          if (col.key === "statusText") tdHtml += `<td>${getStatusBadge(val)}</td>`;
+          else if (col.key === "furigana") tdHtml += `<td style="font-size:${col.fontSize || '1rem'}">${val}</td>`;
+          else {
             const className = col.className || '';
             tdHtml += `<td class="${className}">${val}</td>`;
           }
@@ -1210,7 +847,6 @@
         tbody.appendChild(tr);
       });
       table.appendChild(tbody);
-
       container.appendChild(table);
     }
   </script>
