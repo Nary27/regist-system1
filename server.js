@@ -135,7 +135,7 @@ async function getMultipleSheetsData(sheetNames) {
 
 async function getSummaryData() {
   const sheets = google.sheets({ version: "v4" });
-  const range = `'来場数内訳'!A1:E13`;
+  const range = `'来場数内訳'!A1:E15`;
   try {
     const resp = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
