@@ -522,6 +522,7 @@
       // 保存されたタブ状態を復元
       const savedMainTab = localStorage.getItem("activeMainTab");
       const savedSubTab = localStorage.getItem("activeSubTab");
+      const isMobile = window.innerWidth <= 768;
       
       if (savedMainTab && mainTabList.includes(savedMainTab)) {
         setActiveMainTab(savedMainTab);
@@ -530,15 +531,18 @@
       }
       
       // モバイル表示でメニュータブの場合は来場者状況を優先
-      if (window.innerWidth <= 768 && currentMainTab === "メニュー") {
+      if (isMobile && currentMainTab === "メニュー") {
+        // メニュータブではサブタブを「来場者状況」にする
         document.getElementById("subTabSelect").value = "summary";
-        document.querySelectorAll(".sub-tab-button").forEach(btn => {
-          if (btn.textContent === "来場者状況") {
-            btn.classList.add("active");
-          }
-        });
+        
+        const summaryBtn = document.querySelector(".sub-tab-button[data-special='summary']");
+        if (summaryBtn) {
+          summaryBtn.classList.add("active");
+        }
+        
         showSummaryTable();
       } else if (savedSubTab && allSheetNames.includes(savedSubTab)) {
+        // そうでなければ保存されていたサブタブを復元
         setActiveSubTab(savedSubTab);
       }
 
@@ -549,23 +553,43 @@
       setInterval(async () => {
         showRefreshNotice(true);
         await fetchAllData();
-        if (currentMainTab === "メニュー" && 
-           (!currentSubTab || 
-           (window.innerWidth <= 768 && document.getElementById("subTabSelect").value === "summary"))) {
+        
+        const isMobileNow = window.innerWidth <= 768;
+        const isSummaryActive = isMobileNow && 
+                               currentMainTab === "メニュー" && 
+                               document.getElementById("subTabSelect").value === "summary";
+        
+        if (currentMainTab === "メニュー" && (!currentSubTab || isSummaryActive)) {
           showSummaryTable(); // メニュー時→来場者内訳
         } else if (currentSubTab) {
           renderSheetTable(currentSubTab);
         }
+        
         showRefreshNotice(false);
       }, 30000);
     });
     
     // ウィンドウサイズ変更時の処理
     function handleResize() {
-      // モバイルとPC表示の切り替え時に必要な処理
+      const isMobile = window.innerWidth <= 768;
+      
+      // モバイル・PC表示の切り替わり時
       if (currentMainTab === "メニュー") {
         renderSubTabs("メニュー");
+        
+        // モバイルで来場者状況を選択
+        if (isMobile) {
+          const summaryBtn = document.querySelector(".sub-tab-button[data-special='summary']");
+          if (summaryBtn && !currentSubTab) {
+            summaryBtn.classList.add("active");
+            document.getElementById("subTabSelect").value = "summary";
+          }
+        }
       }
+      
+      // モバイル表示ではサブタブの表示/非表示を切り替え
+      document.querySelector(".select-container.sub-select").style.display = 
+        isMobile && document.getElementById("sub-tabs").style.display !== "none" ? "block" : "none";
     }
 
     // データ更新通知表示
@@ -637,38 +661,43 @@
       
       // メインタブに応じたサブタブをフィルタリング
       let filteredSheets = [];
+      const isMobile = window.innerWidth <= 768;
       
       switch(mainTabName) {
         case "メニュー":
-          // モバイル表示の場合
-          if (window.innerWidth <= 768) {
-            // モバイル表示では「来場者状況」タブを追加
+          // 「来場者状況」タブをメニュータブの最初に追加
+          if (isMobile) {
+            // サブタブに「来場者状況」を追加
             const summaryBtn = document.createElement("div");
             summaryBtn.classList.add("sub-tab-button");
+            summaryBtn.dataset.special = "summary";
             summaryBtn.textContent = "来場者状況";
             summaryBtn.addEventListener("click", () => {
-              // 全サブタブの選択解除
-              document.querySelectorAll(".sub-tab-button").forEach(b => b.classList.remove("active"));
-              // このタブをアクティブに
+              resetSubTab();
+              currentSubTab = ""; // サブタブの選択をリセット
+              
+              // 「来場者状況」ボタンだけアクティブに
+              document.querySelectorAll(".sub-tab-button").forEach(b => {
+                b.classList.remove("active");
+              });
               summaryBtn.classList.add("active");
-              currentSubTab = "";
+              
+              // プルダウンも同期
+              document.getElementById("subTabSelect").value = "summary";
+              
+              // 来場者内訳を表示
               document.getElementById("table-container").innerHTML = "";
               showSummaryTable();
             });
             subTabsContainer.appendChild(summaryBtn);
             
-            // モバイル用プルダウンにも追加
+            // モバイル用プルダウンにも「来場者状況」を追加
             const summaryOpt = document.createElement("option");
             summaryOpt.value = "summary";
             summaryOpt.textContent = "来場者状況";
             subTabSelect.appendChild(summaryOpt);
-            
-            // 初期状態で来場者状況タブを選択状態に
-            if (!currentSubTab) {
-              summaryBtn.classList.add("active");
-              document.getElementById("subTabSelect").value = "summary";
-            }
           }
+          
           filteredSheets = [...allSheetNames];
           break;
         case "全体（あいうえお順）":
@@ -690,7 +719,7 @@
       }
       
       // サブタブが無い場合は非表示
-      if (filteredSheets.length === 0) {
+      if (filteredSheets.length === 0 && !(mainTabName === "メニュー" && isMobile)) {
         subTabsContainer.style.display = "none";
         document.querySelector(".select-container.sub-select").style.display = "none";
         return;
@@ -698,7 +727,7 @@
       
       // サブタブを表示
       subTabsContainer.style.display = "flex";
-      document.querySelector(".select-container.sub-select").style.display = "none"; // モバイル時は表示
+      document.querySelector(".select-container.sub-select").style.display = isMobile ? "block" : "none";
       
       // サブタブ生成
       filteredSheets.forEach(sheetName => {
@@ -716,25 +745,54 @@
         subTabSelect.appendChild(opt);
       });
       
-      // モバイル用プルダウンの先頭に選択肢を追加
-      const defaultOpt = document.createElement("option");
-      defaultOpt.value = "";
-      defaultOpt.textContent = "-- シートを選択 --";
-      subTabSelect.insertBefore(defaultOpt, subTabSelect.firstChild);
+      // モバイル用プルダウンの先頭に選択肢を追加 (メニュー以外の場合)
+      if (mainTabName !== "メニュー" || !isMobile) {
+        const defaultOpt = document.createElement("option");
+        defaultOpt.value = "";
+        defaultOpt.textContent = "-- シートを選択 --";
+        subTabSelect.insertBefore(defaultOpt, subTabSelect.firstChild);
+      }
+      
+      // 現在のサブタブ状態に合わせてアクティブ化
+      if (currentSubTab) {
+        // シートタブが選択されている場合
+        document.querySelectorAll(".sub-tab-button").forEach(btn => {
+          if (btn.textContent === currentSubTab) {
+            btn.classList.add("active");
+          }
+        });
+        document.getElementById("subTabSelect").value = currentSubTab;
+      } else if (mainTabName === "メニュー" && isMobile) {
+        // メニュータブでモバイル表示の場合、デフォルトで来場者状況を選択
+        const summaryBtn = document.querySelector(".sub-tab-button[data-special='summary']");
+        if (summaryBtn) {
+          summaryBtn.classList.add("active");
+          document.getElementById("subTabSelect").value = "summary";
+        }
+      }
       
       // モバイルプルダウンのイベント
-      subTabSelect.addEventListener("change", (e) => {
-        if (e.target.value === "summary") {
+      subTabSelect.addEventListener("change", function(e) {
+        const selectedValue = e.target.value;
+        
+        if (selectedValue === "summary") {
           // 来場者状況を表示
           resetSubTab();
+          currentSubTab = "";
+          
+          // 「来場者状況」ボタンだけアクティブに
           document.querySelectorAll(".sub-tab-button").forEach(btn => {
-            if (btn.textContent === "来場者状況") {
+            btn.classList.remove("active");
+            if (btn.dataset.special === "summary") {
               btn.classList.add("active");
             }
           });
+          
+          // 来場者内訳を表示
+          document.getElementById("table-container").innerHTML = "";
           showSummaryTable();
-        } else if (e.target.value) {
-          setActiveSubTab(e.target.value);
+        } else if (selectedValue) {
+          setActiveSubTab(selectedValue);
         } else {
           // 空選択の場合はメインタブの表示に戻る
           resetSubTab();
@@ -766,15 +824,18 @@
       
       // メニューの場合
       if (tabName === "メニュー") {
-        // モバイル表示の場合は、サブタブの「来場者状況」をアクティブに
-        if (window.innerWidth <= 768) {
-          document.querySelectorAll(".sub-tab-button").forEach(btn => {
-            if (btn.textContent === "来場者状況") {
-              btn.classList.add("active");
-            }
-          });
+        const isMobile = window.innerWidth <= 768;
+        
+        if (isMobile) {
+          // モバイル表示では「来場者状況」タブを自動選択
+          const summaryBtn = document.querySelector(".sub-tab-button[data-special='summary']");
+          if (summaryBtn) {
+            summaryBtn.classList.add("active");
+          }
           document.getElementById("subTabSelect").value = "summary";
         }
+        
+        // 来場者内訳を表示
         showSummaryTable();
       } else {
         document.getElementById("summary-table-area").innerHTML = "";
