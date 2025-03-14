@@ -39,17 +39,29 @@
       box-shadow: var(--shadow);
       margin-bottom: 2rem;
     }
-    h1 {
-      font-size: 2rem;
+    
+    /* Title styling for two lines */
+    .title-container {
       text-align: center;
+      position: relative;
+    }
+    
+    .main-title {
+      font-size: 2rem;
       margin: 0;
       letter-spacing: 1px;
-      position: relative;
-      display: inline-block;
-      left: 50%;
-      transform: translateX(-50%);
+      margin-bottom: 0.5rem;
     }
-    h1::after {
+    
+    .sub-title {
+      font-size: 1.4rem;
+      font-weight: 500;
+      margin: 0;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    /* Remove the underline from the main title and add it to the bottom */
+    .title-container::after {
       content: '';
       position: absolute;
       width: 60%;
@@ -60,6 +72,7 @@
       transform: translateX(-50%);
       border-radius: 2px;
     }
+    
     .card {
       background: white;
       border-radius: var(--radius);
@@ -318,7 +331,8 @@
       .select-container { display: block !important; }
       table { min-width: 900px; }
       th, td { font-size: 0.9rem; padding: 0.5rem; }
-      h1 { font-size: 1.3rem; }
+      .main-title { font-size: 1.4rem; }
+      .sub-title { font-size: 1.1rem; }
       .status-badge { padding: 0.3rem 0.6rem; font-size: 0.7rem; }
       td.time-cell { font-size: 0.8rem; line-height: 1.2; }
     }
@@ -334,7 +348,10 @@
   </div>
   <header>
     <div class="container">
-      <h1 id="page-title">読み込み中...</h1>
+      <div class="title-container">
+        <h1 class="main-title">受付確認システム</h1>
+        <h2 class="sub-title" id="page-title">読み込み中...</h2>
+      </div>
     </div>
   </header>
   <div class="container">
@@ -386,8 +403,13 @@
           return false;
         }
         const info = await infoRes.json();
-        document.getElementById("page-title").textContent = info.title || "受付確認システム";
-        document.title = info.title || "受付確認システム";
+        
+        // Update only the subtitle with the dynamic title
+        document.getElementById("page-title").textContent = info.title || "システム";
+        
+        // The page title should include both lines
+        document.title = "受付確認システム - " + (info.title || "システム");
+        
         allSheetNames = info.sheetNames || [];
         if (allSheetNames.length === 0) {
           document.getElementById("table-container").innerHTML =
@@ -434,8 +456,6 @@
         document.getElementById("subTabSelect").value = "summary";
         const summaryBtn = document.querySelector(".sub-tab-button[data-special='summary']");
         if (summaryBtn) summaryBtn.classList.add("active");
-        const title = document.getElementById("page-title").textContent || "受付確認システム";
-        document.title = title;
         showSummaryTable();
       } else if (savedSubTab && allSheetNames.includes(savedSubTab)) {
         setActiveSubTab(savedSubTab);
@@ -652,8 +672,6 @@
           if (summaryBtn) {
             summaryBtn.classList.add("active");
             document.getElementById("subTabSelect").value = "summary";
-            const title = document.getElementById("page-title").textContent || "受付確認システム";
-            document.title = title;
           }
         }
       }
@@ -664,8 +682,11 @@
     async function showSummaryTable() {
       const summaryDiv = document.getElementById("summary-table-area");
       summaryDiv.innerHTML = "";
-      const title = document.getElementById("page-title").textContent || "受付確認システム";
-      document.title = title;
+      
+      // Update document title to show both parts
+      const subTitle = document.getElementById("page-title").textContent || "システム";
+      document.title = "受付確認システム - " + subTitle;
+      
       showRefreshNotice(true);
       try {
         const res = await fetch("/summary-data");
@@ -688,6 +709,7 @@
         let totalRemainingVisitors  = tableData[8][1] || 0;
         let totalCancelled          = tableData[9][1] || 0;
         let totalLeaving            = tableData[13][1] || 0;
+        
         let html = `<table class="summary-table"><tbody>`;
         html += `
           <tr>
