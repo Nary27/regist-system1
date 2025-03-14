@@ -116,6 +116,26 @@
       transform: translateY(0);
       box-shadow: 0 1px 2px rgba(0,0,0,0.1);
     }
+    /* 選択されているタブをより明確に */
+    .main-tab-button.active {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      position: relative;
+    }
+    /* 選択中のタブにはボトムバーを追加 */
+    .main-tab-button.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background-color: var(--accent);
+    }
+    /* 組織別のアクティブインジケーター色 */
+    .main-tab-button.zenkai.active::after { background-color: var(--color-all); }
+    .main-tab-button.npkk.active::after { background-color: var(--color-npkk); }
+    .main-tab-button.opc.active::after { background-color: var(--color-opc); }
     .main-tab-button:hover {
       background: rgba(255,255,255,0.9);
       transform: translateY(-2px);
@@ -180,7 +200,19 @@
       display: none;
     }
     .select-container.main-select { margin-top: 1.5rem; }
-    .select-container.sub-select { margin-top: 0.5rem; }
+    .select-container.sub-select { 
+      margin-top: 0.5rem; 
+      position: relative;
+    }
+    .select-container.sub-select::before {
+      content: 'シートを選択してください';
+      position: absolute;
+      top: -22px;
+      left: 0;
+      font-size: 0.85rem;
+      color: var(--dark);
+      font-weight: 500;
+    }
     select {
       width: 100%;
       padding: 0.8rem 1rem;
@@ -367,6 +399,30 @@
         font-size: 0.9rem;
         min-width: auto;
       }
+      /* モバイルでの選択中タブをより明確に */
+      .main-tab-button.active {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        border: 2px solid rgba(255,255,255,0.8);
+        position: relative;
+      }
+      /* 選択中タブにインジケーターを追加 */
+      .main-tab-button.active::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-top: 8px solid var(--accent);
+      }
+      .main-tab-button.zenkai.active::after { border-top-color: var(--color-all); }
+      .main-tab-button.npkk.active::after { border-top-color: var(--color-npkk); }
+      .main-tab-button.opc.active::after { border-top-color: var(--color-opc); }
+      
       table { min-width: 900px; }
       th, td { font-size: 0.9rem; padding: 0.5rem; }
       .main-title { font-size: 1.4rem; }
@@ -481,24 +537,41 @@
     window.addEventListener("DOMContentLoaded", async () => {
       const initialized = await initializeApp();
       if (!initialized) return;
-      renderMainTabs();
-      // 復元：localStorage から保存されたタブ情報を読み出す
+      
+      // localStorage から保存されたタブ情報を読み出す
       const savedMainTab = localStorage.getItem("activeMainTab");
       const savedSubTab = localStorage.getItem("activeSubTab");
-      const isMobile = window.innerWidth <= 768;
+      
+      renderMainTabs();
+      
+      // メインタブの設定
       if (savedMainTab && mainTabList.includes(savedMainTab)) {
         setActiveMainTab(savedMainTab);
       } else {
         setActiveMainTab("全体");
       }
-      if (isMobile && currentMainTab === "全体") {
+      
+      // サブタブの設定
+      const isMobile = window.innerWidth <= 768;
+      if (savedSubTab) {
+        if (allSheetNames.includes(savedSubTab) || savedSubTab === "summary") {
+          // 保存されていたサブタブを設定
+          setActiveSubTab(savedSubTab);
+        } else if (currentMainTab === "全体") {
+          // 全体タブのデフォルト
+          document.getElementById("subTabSelect").value = "summary";
+          const summaryBtn = document.querySelector(".sub-tab-button[data-special='summary']");
+          if (summaryBtn) summaryBtn.classList.add("active");
+          showSummaryTable();
+        }
+      } else if (currentMainTab === "全体") {
+        // 全体タブで、サブタブが未選択の場合は来場者状況を表示
         document.getElementById("subTabSelect").value = "summary";
         const summaryBtn = document.querySelector(".sub-tab-button[data-special='summary']");
         if (summaryBtn) summaryBtn.classList.add("active");
         showSummaryTable();
-      } else if (savedSubTab && allSheetNames.includes(savedSubTab)) {
-        setActiveSubTab(savedSubTab);
       }
+      
       window.addEventListener("resize", handleResize);
       setInterval(async () => {
         const success = await fetchAllData();
@@ -584,6 +657,12 @@
       let filteredSheets = [];
       const isMobile = window.innerWidth <= 768;
       
+      // まず「シートを選択してください」のデフォルトオプションを追加
+      const defaultOpt = document.createElement("option");
+      defaultOpt.value = "";
+      defaultOpt.textContent = "-- シートを選択してください --";
+      subTabSelect.appendChild(defaultOpt);
+      
       switch(mainTabName) {
         case "全体":
           // 全体 が選択された場合のサブタブ
@@ -660,18 +739,30 @@
         subTabSelect.appendChild(opt);
       });
       
-      if (mainTabName !== "全体" || !isMobile) {
-        const defaultOpt = document.createElement("option");
-        defaultOpt.value = "";
-        defaultOpt.textContent = "-- シートを選択 --";
-        subTabSelect.insertBefore(defaultOpt, subTabSelect.firstChild);
-      }
-      
+      // currentSubTab を維持する処理
       if (currentSubTab) {
+        let subTabExists = false;
         document.querySelectorAll(".sub-tab-button").forEach(btn => {
-          if (btn.textContent === currentSubTab) btn.classList.add("active");
+          if (btn.textContent === currentSubTab) {
+            btn.classList.add("active");
+            subTabExists = true;
+          }
         });
-        document.getElementById("subTabSelect").value = currentSubTab;
+        
+        if (subTabExists) {
+          document.getElementById("subTabSelect").value = currentSubTab;
+        } else if (mainTabName === "全体") {
+          // 全体タブで、かつ現在のサブタブが見つからない場合は summary にフォールバック
+          currentSubTab = "summary";
+          document.getElementById("subTabSelect").value = "summary";
+          const summaryBtnActive = document.querySelector(".sub-tab-button[data-special='summary']");
+          if (summaryBtnActive) summaryBtnActive.classList.add("active");
+          showSummaryTable();
+        } else {
+          // 他のタブで現在のサブタブが見つからない場合はリセット
+          currentSubTab = "";
+          document.getElementById("subTabSelect").value = "";
+        }
       } else if (mainTabName === "全体") {
         const summaryBtnActive = document.querySelector(".sub-tab-button[data-special='summary']");
         if (summaryBtnActive) {
