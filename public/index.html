@@ -108,6 +108,13 @@
       color: var(--dark);
       min-width: 120px;
       text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    /* 押された感を出す */
+    .main-tab-button:active {
+      transform: translateY(0);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
     }
     .main-tab-button:hover {
       background: rgba(255,255,255,0.9);
@@ -345,8 +352,21 @@
     .error-title { color: var(--danger); font-weight: bold; margin-bottom: 0.5rem; }
     .error-message { color: var(--dark); margin-bottom: 0.5rem; }
     @media (max-width: 768px) {
-      .main-tabs, .sub-tabs { display: none !important; }
-      .select-container { display: block !important; }
+      .sub-tabs { display: none !important; }
+      .select-container.sub-select { display: block !important; }
+      .select-container.main-select { display: none !important; }
+      .main-tabs { 
+        display: flex !important;
+        gap: 0.3rem;
+        justify-content: space-between;
+        padding: 0.8rem;
+      }
+      .main-tab-button {
+        flex: 1;
+        padding: 0.8rem 0.5rem;
+        font-size: 0.9rem;
+        min-width: auto;
+      }
       table { min-width: 900px; }
       th, td { font-size: 0.9rem; padding: 0.5rem; }
       .main-title { font-size: 1.4rem; }
@@ -746,8 +766,17 @@
           }
         }
       }
-      document.querySelector(".select-container.sub-select").style.display =
-        isMobile && document.getElementById("sub-tabs").style.display !== "none" ? "block" : "none";
+      if (isMobile) {
+        document.querySelector(".select-container.sub-select").style.display = 
+          document.getElementById("sub-tabs").style.display !== "none" ? "block" : "none";
+        document.querySelector(".select-container.main-select").style.display = "none";
+        document.getElementById("main-tabs").style.display = "flex";
+      } else {
+        document.querySelector(".select-container.sub-select").style.display = "none";
+        document.querySelector(".select-container.main-select").style.display = "none";
+        document.getElementById("main-tabs").style.display = "flex";
+        document.getElementById("sub-tabs").style.display = "flex";
+      }
     }
 
     async function showSummaryTable() {
