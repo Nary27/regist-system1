@@ -146,6 +146,7 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 8px rgba(52,152,219,0.3);
     }
+    /* メインタブボタンスタイル（各組織ごと） */
     .main-tab-button.zenkai {
       background-color: var(--color-all);
       color: white;
@@ -157,6 +158,22 @@
     .main-tab-button.opc {
       background-color: var(--color-opc);
       color: white;
+    }
+    /* アクティブ状態のメインタブ */
+    .main-tab-button.active {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      position: relative;
+    }
+    /* 選択中のタブにはボトムバーを追加 */
+    .main-tab-button.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background-color: rgba(255,255,255,0.8);
     }
     /* サブタブ行 */
     .sub-tabs {
@@ -200,19 +217,7 @@
       display: none;
     }
     .select-container.main-select { margin-top: 1.5rem; }
-    .select-container.sub-select { 
-      margin-top: 0.5rem; 
-      position: relative;
-    }
-    .select-container.sub-select::before {
-      content: 'シートを選択してください';
-      position: absolute;
-      top: -22px;
-      left: 0;
-      font-size: 0.85rem;
-      color: var(--dark);
-      font-weight: 500;
-    }
+    .select-container.sub-select { margin-top: 0.5rem; }
     select {
       width: 100%;
       padding: 0.8rem 1rem;
@@ -401,27 +406,45 @@
       }
       /* モバイルでの選択中タブをより明確に */
       .main-tab-button.active {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        border: 2px solid rgba(255,255,255,0.8);
+        transform: translateY(-3px);
+        box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+        border: 2px solid rgba(255,255,255,0.9);
         position: relative;
+        /* より目立つように色を濃くする */
+        filter: brightness(0.9);
+        font-weight: 700;
       }
-      /* 選択中タブにインジケーターを追加 */
+      /* 選択中タブにインジケーターを追加（より大きく） */
       .main-tab-button.active::after {
         content: '';
         position: absolute;
-        bottom: -8px;
+        bottom: -10px;
         left: 50%;
         transform: translateX(-50%);
         width: 0;
         height: 0;
-        border-left: 8px solid transparent;
-        border-right: 8px solid transparent;
-        border-top: 8px solid var(--accent);
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-top: 10px solid var(--accent);
       }
       .main-tab-button.zenkai.active::after { border-top-color: var(--color-all); }
       .main-tab-button.npkk.active::after { border-top-color: var(--color-npkk); }
       .main-tab-button.opc.active::after { border-top-color: var(--color-opc); }
+      
+      /* タブ間にラインを追加して区切る */
+      .main-tab-button:not(:last-child) {
+        border-right: 1px solid rgba(255, 255, 255, 0.3);
+      }
+      
+      /* シートを選択してくださいのラベルをタブの下に表示 */
+      .select-container.sub-select {
+        margin-top: 1.5rem;
+      }
+      
+      /* 非選択タブの見た目を調整 */
+      .main-tab-button:not(.active) {
+        opacity: 0.85;
+      }
       
       table { min-width: 900px; }
       th, td { font-size: 0.9rem; padding: 0.5rem; }
@@ -660,7 +683,7 @@
       // まず「シートを選択してください」のデフォルトオプションを追加
       const defaultOpt = document.createElement("option");
       defaultOpt.value = "";
-      defaultOpt.textContent = "-- シートを選択してください --";
+      defaultOpt.textContent = "シートを選択してください";
       subTabSelect.appendChild(defaultOpt);
       
       switch(mainTabName) {
