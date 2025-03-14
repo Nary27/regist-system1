@@ -20,6 +20,10 @@
       --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       --radius: 8px;
       --transition: all 0.3s ease;
+      /* 組織別カラー */
+      --color-all: #404040;
+      --color-npkk: #e67e22;
+      --color-opc: #3498db;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -84,7 +88,7 @@
     .main-tabs {
       display: flex;
       gap: 0.5rem;
-      justify-content: flex-start;
+      justify-content: center;
       overflow-x: auto;
       flex-wrap: nowrap;
       padding: 1rem;
@@ -92,7 +96,7 @@
       border-bottom: 1px solid rgba(0,0,0,0.1);
     }
     .main-tab-button {
-      padding: 0.8rem 1.2rem;
+      padding: 0.8rem 2.5rem;
       background: white;
       border: none;
       border-radius: var(--radius);
@@ -102,6 +106,8 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
       transition: var(--transition);
       color: var(--dark);
+      min-width: 120px;
+      text-align: center;
     }
     .main-tab-button:hover {
       background: rgba(255,255,255,0.9);
@@ -112,6 +118,18 @@
       color: white;
       transform: translateY(-2px);
       box-shadow: 0 4px 8px rgba(52,152,219,0.3);
+    }
+    .main-tab-button.zenkai {
+      background-color: var(--color-all);
+      color: white;
+    }
+    .main-tab-button.npkk {
+      background-color: var(--color-npkk);
+      color: white;
+    }
+    .main-tab-button.opc {
+      background-color: var(--color-opc);
+      color: white;
     }
     /* サブタブ行 */
     .sub-tabs {
@@ -389,8 +407,8 @@
     // グローバル変数
     let allSheetNames = [];
     let allData = {};
-    let mainTabList = ["メニュー", "全体（あいうえお順）", "全体（エリア順）", "NPKK", "OPC"];
-    let currentMainTab = "メニュー";
+    let mainTabList = ["全体", "NPKK", "OPC"];
+    let currentMainTab = "全体";
     let currentSubTab = "";
     let isRefreshing = false;
 
@@ -451,9 +469,9 @@
       if (savedMainTab && mainTabList.includes(savedMainTab)) {
         setActiveMainTab(savedMainTab);
       } else {
-        setActiveMainTab("メニュー");
+        setActiveMainTab("全体");
       }
-      if (isMobile && currentMainTab === "メニュー") {
+      if (isMobile && currentMainTab === "全体") {
         document.getElementById("subTabSelect").value = "summary";
         const summaryBtn = document.querySelector(".sub-tab-button[data-special='summary']");
         if (summaryBtn) summaryBtn.classList.add("active");
@@ -466,8 +484,8 @@
         const success = await fetchAllData();
         if (success) {
           const isMobileNow = window.innerWidth <= 768;
-          const isSummaryActive = isMobileNow && currentMainTab === "メニュー" && document.getElementById("subTabSelect").value === "summary";
-          if (currentMainTab === "メニュー" && (!currentSubTab || isSummaryActive)) {
+          const isSummaryActive = isMobileNow && currentMainTab === "全体" && document.getElementById("subTabSelect").value === "summary";
+          if (currentMainTab === "全体" && (!currentSubTab || isSummaryActive)) {
             showSummaryTable();
           } else if (currentSubTab) {
             renderSheetTable(currentSubTab);
@@ -509,18 +527,33 @@
       const mainTabSelect = document.getElementById("mainTabSelect");
       mainTabsContainer.innerHTML = "";
       mainTabSelect.innerHTML = "";
+      
+      // メインタブのクラス指定
+      const tabClasses = {
+        "全体": "zenkai",
+        "NPKK": "npkk",
+        "OPC": "opc"
+      };
+      
       mainTabList.forEach(tabName => {
         const btn = document.createElement("div");
         btn.classList.add("main-tab-button");
+        if (tabClasses[tabName]) {
+          btn.classList.add(tabClasses[tabName]);
+        }
         btn.textContent = tabName;
         btn.addEventListener("click", () => setActiveMainTab(tabName));
         mainTabsContainer.appendChild(btn);
+        
         const opt = document.createElement("option");
         opt.value = tabName;
         opt.textContent = tabName;
         mainTabSelect.appendChild(opt);
       });
-      mainTabSelect.addEventListener("change", (e) => { setActiveMainTab(e.target.value); });
+      
+      mainTabSelect.addEventListener("change", (e) => { 
+        setActiveMainTab(e.target.value); 
+      });
     }
 
     function renderSubTabs(mainTabName) {
@@ -530,9 +563,11 @@
       subTabSelect.innerHTML = "";
       let filteredSheets = [];
       const isMobile = window.innerWidth <= 768;
+      
       switch(mainTabName) {
-        case "メニュー":
-          // ここでは常に PC・モバイル問わず「来場者状況」タブを先頭に追加
+        case "全体":
+          // 全体 が選択された場合のサブタブ
+          // まず常に「来場者状況」タブを先頭に追加
           const summaryBtn = document.createElement("div");
           summaryBtn.classList.add("sub-tab-button");
           summaryBtn.dataset.special = "summary";
@@ -545,61 +580,86 @@
             showSummaryTable();
           });
           subTabsContainer.appendChild(summaryBtn);
+          
           const summaryOpt = document.createElement("option");
           summaryOpt.value = "summary";
           summaryOpt.textContent = "来場者状況";
           subTabSelect.appendChild(summaryOpt);
-          filteredSheets = [...allSheetNames];
+          
+          // 全体(あいうえお順)と全体(エリア順)のシートを追加
+          filteredSheets = allSheetNames.filter(name => 
+            name.includes("全体（あいうえお順）") || 
+            name.includes("全体(あいうえお順)") || 
+            name.includes("全体（エリア順）") || 
+            name.includes("全体(エリア順)")
+          );
           break;
-        case "全体（あいうえお順）":
-          filteredSheets = allSheetNames.filter(name => name.includes("全体（あいうえお順）") || name.includes("全体(あいうえお順)"));
-          break;
-        case "全体（エリア順）":
-          filteredSheets = allSheetNames.filter(name => name.includes("全体（エリア順）") || name.includes("全体(エリア順)"));
-          break;
+          
         case "NPKK":
-          filteredSheets = allSheetNames.filter(name => name.startsWith("N."));
+          // NPKKが選択された場合のサブタブ
+          filteredSheets = allSheetNames.filter(name => 
+            name.startsWith("N.") || 
+            name.includes("NPKK（あいうえお順）") || 
+            name.includes("NPKK(あいうえお順)") ||
+            name.includes("NPKK（エリア順）") || 
+            name.includes("NPKK(エリア順)")
+          );
           break;
+          
         case "OPC":
-          filteredSheets = allSheetNames.filter(name => name.startsWith("O."));
+          // OPCが選択された場合のサブタブ
+          filteredSheets = allSheetNames.filter(name => 
+            name.startsWith("O.") || 
+            name.includes("OPC（あいうえお順）") || 
+            name.includes("OPC(あいうえお順)") ||
+            name.includes("OPC（エリア順）") || 
+            name.includes("OPC(エリア順)")
+          );
           break;
       }
-      if (filteredSheets.length === 0 && !(mainTabName === "メニュー" && isMobile)) {
+      
+      if (filteredSheets.length === 0 && !(mainTabName === "全体" && isMobile)) {
         subTabsContainer.style.display = "none";
         document.querySelector(".select-container.sub-select").style.display = "none";
         return;
       }
+      
       subTabsContainer.style.display = "flex";
       document.querySelector(".select-container.sub-select").style.display = isMobile ? "block" : "none";
+      
       filteredSheets.forEach(sheetName => {
         const btn = document.createElement("div");
         btn.classList.add("sub-tab-button");
         btn.textContent = sheetName;
         btn.addEventListener("click", () => setActiveSubTab(sheetName));
         subTabsContainer.appendChild(btn);
+        
         const opt = document.createElement("option");
         opt.value = sheetName;
         opt.textContent = sheetName;
         subTabSelect.appendChild(opt);
       });
-      if (mainTabName !== "メニュー" || !isMobile) {
+      
+      if (mainTabName !== "全体" || !isMobile) {
         const defaultOpt = document.createElement("option");
         defaultOpt.value = "";
         defaultOpt.textContent = "-- シートを選択 --";
         subTabSelect.insertBefore(defaultOpt, subTabSelect.firstChild);
       }
+      
       if (currentSubTab) {
         document.querySelectorAll(".sub-tab-button").forEach(btn => {
           if (btn.textContent === currentSubTab) btn.classList.add("active");
         });
         document.getElementById("subTabSelect").value = currentSubTab;
-      } else if (mainTabName === "メニュー") {
+      } else if (mainTabName === "全体") {
         const summaryBtnActive = document.querySelector(".sub-tab-button[data-special='summary']");
         if (summaryBtnActive) {
           summaryBtnActive.classList.add("active");
           document.getElementById("subTabSelect").value = "summary";
         }
       }
+      
       subTabSelect.addEventListener("change", (e) => {
         const selectedValue = e.target.value;
         if (selectedValue === "summary") {
@@ -617,22 +677,27 @@
       });
     }
 
-    // 修正済み setActiveMainTab
     function setActiveMainTab(tabName) {
       currentMainTab = tabName;
       localStorage.setItem("activeMainTab", tabName);
+      
       document.querySelectorAll(".main-tab-button").forEach(btn => {
         btn.classList.remove("active");
         if (btn.textContent === tabName) btn.classList.add("active");
       });
+      
       document.getElementById("mainTabSelect").value = tabName;
       renderSubTabs(tabName);
-      if (tabName === "メニュー") {
-        if (!localStorage.getItem("activeSubTab")) {
-          setActiveSubTab("summary");
-        } else {
-          if (localStorage.getItem("activeSubTab") === "summary") {
-            showSummaryTable();
+      
+      if (tabName === "全体") {
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile || !localStorage.getItem("activeSubTab") || localStorage.getItem("activeSubTab") === "summary") {
+          document.getElementById("summary-table-area").innerHTML = "";
+          showSummaryTable();
+          if (isMobile) {
+            document.getElementById("subTabSelect").value = "summary";
+            const summaryBtn = document.querySelector(".sub-tab-button[data-special='summary']");
+            if (summaryBtn) summaryBtn.classList.add("active");
           }
         }
       } else {
@@ -643,12 +708,15 @@
     function setActiveSubTab(tabName) {
       currentSubTab = tabName;
       localStorage.setItem("activeSubTab", tabName);
+      
       document.querySelectorAll(".sub-tab-button").forEach(btn => {
         btn.classList.remove("active");
         if (btn.textContent === tabName) btn.classList.add("active");
       });
+      
       document.getElementById("subTabSelect").value = tabName;
       document.getElementById("summary-table-area").innerHTML = "";
+      
       if (tabName === "summary") {
         showSummaryTable();
       } else {
@@ -659,15 +727,17 @@
     function resetSubTab() {
       currentSubTab = "";
       localStorage.removeItem("activeSubTab");
-      document.querySelectorAll(".sub-tab-button").forEach(btn => { if (!btn.dataset.special) btn.classList.remove("active"); });
+      document.querySelectorAll(".sub-tab-button").forEach(btn => { 
+        if (!btn.dataset.special) btn.classList.remove("active"); 
+      });
       document.getElementById("subTabSelect").value = "";
       document.getElementById("table-container").innerHTML = "";
     }
 
     function handleResize() {
       const isMobile = window.innerWidth <= 768;
-      if (currentMainTab === "メニュー") {
-        renderSubTabs("メニュー");
+      if (currentMainTab === "全体") {
+        renderSubTabs("全体");
         if (isMobile && !currentSubTab) {
           const summaryBtn = document.querySelector(".sub-tab-button[data-special='summary']");
           if (summaryBtn) {
@@ -772,7 +842,7 @@
     async function fetchAllDataAndRenderCurrent() {
       const success = await fetchAllData();
       if (success) {
-        if (currentMainTab === "メニュー" && !currentSubTab) {
+        if (currentMainTab === "全体" && !currentSubTab) {
           showSummaryTable();
         } else if (currentSubTab) {
           renderSheetTable(currentSubTab);
