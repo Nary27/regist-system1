@@ -709,11 +709,12 @@
           subTabSelect.appendChild(summaryOpt);
           
           // 全体(あいうえお順)と全体(エリア順)のシートを追加
-          filteredSheets = allSheetNames.filter(name => 
-            name.includes("全体（あいうえお順）") || 
+          filteredSheets = allSheetNames.filter(name =>
+            name.includes("全体（あいうえお順）") ||
             name.includes("全体(あいうえお順)") || 
             name.includes("全体（エリア順）") || 
-            name.includes("全体(エリア順)")
+            name.includes("全体(エリア順)") ||
+            name.includes("役割者")
           );
           break;
           
