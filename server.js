@@ -29,7 +29,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// Basic認証 (ID=0126, PW=0126)
+// Basic認証
 function basicAuth(req, res, next) {
   const authHeader = req.headers["authorization"];
   if (!authHeader) {
@@ -39,7 +39,7 @@ function basicAuth(req, res, next) {
   const base64 = authHeader.split(" ")[1];
   const decoded = Buffer.from(base64, "base64").toString();
   const [user, pass] = decoded.split(":");
-  if (user === "0316" && pass === "0316") {
+  if (user === "test" && pass === "1771") {
     next();
   } else {
     res.setHeader("WWW-Authenticate", 'Basic realm="Restricted"');
